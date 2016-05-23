@@ -4,7 +4,7 @@
   "description": "[![NPM](https://nodei.co/npm/hyperdrive-swarm.png)](https://nodei.co/npm/hyperdrive-swarm/)",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node tests/ | tap-spec"
   },
   "repository": {
     "type": "git",
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/karissa/hyperdrive-swarm#readme",
   "devDependencies": {
+    "tap-spec": "^4.1.1",
     "tape": "^4.5.1"
   },
   "dependencies": {

@@ -105,6 +105,7 @@ Dat.prototype.link = function (dir, cb) {
     if (err) throw err
     var archive = self.drive.createArchive({
       file: function (name) {
+        console.log('file', dir, name)
         return raf(path.join(dir, name))
       }
     })
