@@ -1,5 +1,5 @@
 # hyperdrive-swarm
 
-Creates a swarm for hyperdrive.
+Starts and tracks a swarm for hyperdrive.
 
-[![NPM](https://nodei.co/npm/hyperdrive-swarm.png)](https://nodei.co/npm/hyperdrive-swarm/)
+[![Travis](https://api.travis-ci.org/maxogden/dat.svg)](https://travis-ci.org/maxogden/dat)

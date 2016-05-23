@@ -1,6 +1,6 @@
 var path = require('path')
 var raf = require('random-access-file')
-var debug = require('debug')('dat')
+var debug = require('debug')('hyperdrive-swarm')
 var walker = require('folder-walker')
 var hyperdrive = require('hyperdrive')
 var speedometer = require('speedometer')
@@ -10,17 +10,17 @@ var through = require('through2')
 var discoverySwarm = require('discovery-swarm')
 var events = require('events')
 
-module.exports = Dat
+module.exports = Swarm
 
 var DEFAULT_PORT = 3282
 var DEFAULT_DISCOVERY = [
   'discovery1.publicbits.org',
   'discovery2.publicbits.org'
 ]
-var DAT_DOMAIN = 'dat.local'
+var DEFAULT_DOMAIN = 'Hyperdrive.local'
 
-function Dat (opts) {
-  if (!(this instanceof Dat)) return new Dat(opts)
+function Swarm (opts) {
+  if (!(this instanceof Swarm)) return new Swarm(opts)
   if (!opts) opts = {}
   var self = this
   self.fs = opts.fs || require('./fs.js')
@@ -33,7 +33,7 @@ function Dat (opts) {
 
   var discovery = opts.discovery !== false
   self.swarm = discoverySwarm({
-    dns: discovery && {server: DEFAULT_DISCOVERY, domain: DAT_DOMAIN},
+    dns: discovery && {server: DEFAULT_DISCOVERY, domain: opts.domain || DEFAULT_DOMAIN},
     dht: discovery
   })
   self.swarm.listen(opts.port || DEFAULT_PORT)
@@ -43,35 +43,35 @@ function Dat (opts) {
   })
 }
 
-Dat.DNS_SERVERS = DEFAULT_DISCOVERY
+Swarm.DNS_SERVERS = DEFAULT_DISCOVERY
 
-Dat.prototype.scan = function (dirs, onEach, cb) {
-  var stream = walker(dirs, {filter: function (data) {
-    if (path.basename(data) === '.dat') return false
+Swarm.prototype.scan = function (dirs, onEach, cb) {
+  var stream = walker(dirs, {filter: function (Swarma) {
+    if (path.basename(Swarma) === '.Swarm') return false
     return true
   }})
 
-  each(stream, function (data, next) {
+  each(stream, function (Swarma, next) {
     var item = {
-      name: data.relname,
-      path: path.resolve(data.filepath),
-      mtime: data.stat.mtime.getTime(),
-      ctime: data.stat.ctime.getTime(),
-      size: data.stat.size,
-      root: data.root
+      name: Swarma.relname,
+      path: path.resolve(Swarma.filepath),
+      mtime: Swarma.stat.mtime.getTime(),
+      ctime: Swarma.stat.ctime.getTime(),
+      size: Swarma.stat.size,
+      root: Swarma.root
     }
 
-    var isFile = data.stat.isFile()
+    var isFile = Swarma.stat.isFile()
     if (isFile) {
       item.type = 'file'
     }
-    var isDir = data.stat.isDirectory()
+    var isDir = Swarma.stat.isDirectory()
     if (isDir) item.type = 'directory'
     onEach(item, next)
   }, cb)
 }
 
-Dat.prototype.fileStats = function (dir, cb) {
+Swarm.prototype.fileStats = function (dir, cb) {
   this.scan(dir, eachItem, done)
 
   var totalStats = {
@@ -98,7 +98,7 @@ Dat.prototype.fileStats = function (dir, cb) {
   }
 }
 
-Dat.prototype.link = function (dir, cb) {
+Swarm.prototype.link = function (dir, cb) {
   var self = this
   if (Array.isArray(dir)) throw new Error('cannot specify multiple dirs in .link')
   self.fileStats(dir, function (err, totalStats) {
@@ -129,9 +129,9 @@ Dat.prototype.link = function (dir, cb) {
     }
 
     var uploadRate = speedometer()
-    archive.on('upload', function (entry, data) {
-      stats.uploaded.bytesRead += data.length
-      stats.uploadRate = uploadRate(data.length)
+    archive.on('upload', function (entry, Swarma) {
+      stats.uploaded.bytesRead += Swarma.length
+      stats.uploadRate = uploadRate(Swarma.length)
       emitter.emit('stats')
     })
 
@@ -173,33 +173,33 @@ Dat.prototype.link = function (dir, cb) {
   })
 }
 
-Dat.prototype.leave = function (dir) {
+Swarm.prototype.leave = function (dir) {
   var self = this
-  debug('leaving', dat)
-  var dat = self.status[dir]
-  var link = self._normalize(dat.link)
+  debug('leaving', Swarm)
+  var Swarm = self.status[dir]
+  var link = self._normalize(Swarm.link)
   debug('left', link)
   self.swarm.leave(new Buffer(link, 'hex'))
   self.status[dir].state = 'inactive'
   return
 }
 
-Dat.prototype.close = function (cb) {
+Swarm.prototype.close = function (cb) {
   var self = this
   self.swarm.destroy(cb)
 }
 
-Dat.prototype._normalize = function (link) {
-  return link.replace('dat://', '').replace('dat:', '')
+Swarm.prototype._normalize = function (link) {
+  return link.replace('Swarm://', '').replace('Swarm:', '')
 }
 
-Dat.prototype.get = function (link, dir) {
+Swarm.prototype.get = function (link, dir) {
   var key = this._normalize(link)
   return this.drive.get(key, dir)
 }
 
 // returns object that is used to render progress bars
-Dat.prototype.join = function (link, dir, opts, cb) {
+Swarm.prototype.join = function (link, dir, opts, cb) {
   var self = this
   if ((typeof opts) === 'function') return this.join(link, dir, {}, opts)
   if (!opts) opts = {}
