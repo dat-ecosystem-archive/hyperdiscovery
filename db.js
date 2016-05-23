@@ -9,7 +9,7 @@ module.exports = function (opts) {
     createIfMissing: true
   }
   opts = xtend(opts, defaults)
-  var dbDir = path.join(opts.home || homeDir(), '.dat', 'db')
+  var dbDir = path.join(opts.home || homeDir(), '.hyperdrive', 'db')
   if (opts.createIfMissing) mkdirp.sync(dbDir) // ensure all parent foldes exist
   var levelup = level(dbDir, opts)
   return levelup
