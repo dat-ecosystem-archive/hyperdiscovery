@@ -98,14 +98,19 @@ Swarm.prototype.fileStats = function (dir, cb) {
   }
 }
 
-Swarm.prototype.link = function (dir, cb) {
+Swarm.prototype.link = function (dir, opts, cb) {
   var self = this
+  if (!opts) opts = {}
+  if ((typeof opts) === 'function') {
+    cb = opts
+    opts = {}
+  }
   if (Array.isArray(dir)) throw new Error('cannot specify multiple dirs in .link')
   self.fileStats(dir, function (err, totalStats) {
     if (err) throw err
     var archive = self.drive.createArchive({
       file: function (name) {
-        console.log('file', dir, name)
+        debug('raf', dir, name)
         return raf(path.join(dir, name))
       }
     })
@@ -202,7 +207,7 @@ Swarm.prototype.join = function (link, dir, opts, cb) {
   debug('joining', link)
   var archive = self.drive.createArchive(link, {
     file: function (name) {
-      debug('raf', dir, name)
+      debug('raf2', dir, name)
       return raf(path.join(dir, name))
     }
   })
@@ -210,7 +215,6 @@ Swarm.prototype.join = function (link, dir, opts, cb) {
   self.swarm.on('connection', function (connection) {
     connection.pipe(archive.replicate()).pipe(connection)
   })
-
   var downloader = through.obj(function (entry, enc, next) {
     debug('downloading', entry)
     archive.download(entry, function (err) {
