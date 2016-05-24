@@ -46,26 +46,26 @@ function Swarm (opts) {
 Swarm.DNS_SERVERS = DEFAULT_DISCOVERY
 
 Swarm.prototype.scan = function (dirs, onEach, cb) {
-  var stream = walker(dirs, {filter: function (Swarma) {
-    if (path.basename(Swarma) === '.Swarm') return false
+  var stream = walker(dirs, {filter: function (data) {
+    if (path.basename(data) === '.dat') return false
     return true
   }})
 
-  each(stream, function (Swarma, next) {
+  each(stream, function (data, next) {
     var item = {
-      name: Swarma.relname,
-      path: path.resolve(Swarma.filepath),
-      mtime: Swarma.stat.mtime.getTime(),
-      ctime: Swarma.stat.ctime.getTime(),
-      size: Swarma.stat.size,
-      root: Swarma.root
+      name: data.relname,
+      path: path.resolve(data.filepath),
+      mtime: data.stat.mtime.getTime(),
+      ctime: data.stat.ctime.getTime(),
+      size: data.stat.size,
+      root: data.root
     }
 
-    var isFile = Swarma.stat.isFile()
+    var isFile = data.stat.isFile()
     if (isFile) {
       item.type = 'file'
     }
-    var isDir = Swarma.stat.isDirectory()
+    var isDir = data.stat.isDirectory()
     if (isDir) item.type = 'directory'
     onEach(item, next)
   }, cb)
@@ -129,9 +129,10 @@ Swarm.prototype.link = function (dir, cb) {
     }
 
     var uploadRate = speedometer()
-    archive.on('upload', function (entry, Swarma) {
-      stats.uploaded.bytesRead += Swarma.length
-      stats.uploadRate = uploadRate(Swarma.length)
+    archive.on('upload', function (entry, data) {
+      stats.uploaded.bytesRead += data.length
+      stats.uploadRate = uploadRate(data.length)
+      debug('upload', entry, data)
       emitter.emit('stats')
     })
 
@@ -141,7 +142,8 @@ Swarm.prototype.link = function (dir, cb) {
       var fileStats = {bytesRead: 0}
       if (path.normalize(item.path) === path.normalize(item.root)) return next()
       debug('appending', item)
-      archive.append(item.name, function () {
+      archive.append(item.name, function (err) {
+        if (err) return next(err)
         stats.progress.filesRead += 1
         stats.progress.bytesRead += item.size
         debug('done adding', item.name)
@@ -175,11 +177,9 @@ Swarm.prototype.link = function (dir, cb) {
 
 Swarm.prototype.leave = function (dir) {
   var self = this
-  debug('leaving', Swarm)
-  var Swarm = self.status[dir]
-  var link = self._normalize(Swarm.link)
-  debug('left', link)
-  self.swarm.leave(new Buffer(link, 'hex'))
+  debug('leaving', dir)
+  var swarm = self.status[dir]
+  self.swarm.leave(new Buffer(swarm.link, 'hex'))
   self.status[dir].state = 'inactive'
   return
 }
@@ -187,15 +187,6 @@ Swarm.prototype.leave = function (dir) {
 Swarm.prototype.close = function (cb) {
   var self = this
   self.swarm.destroy(cb)
-}
-
-Swarm.prototype._normalize = function (link) {
-  return link.replace('Swarm://', '').replace('Swarm:', '')
-}
-
-Swarm.prototype.get = function (link, dir) {
-  var key = this._normalize(link)
-  return this.drive.get(key, dir)
 }
 
 // returns object that is used to render progress bars
@@ -207,7 +198,7 @@ Swarm.prototype.join = function (link, dir, opts, cb) {
   if (!link) return cb(new Error('Link required'))
   if (!dir) return cb(new Error('Directory required'))
 
-  link = new Buffer(this._normalize(link), 'hex')
+  link = new Buffer(link, 'hex')
   debug('joining', link)
   var archive = self.drive.createArchive(link, {
     file: function (name) {
