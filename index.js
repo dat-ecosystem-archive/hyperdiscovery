@@ -23,12 +23,8 @@ function Swarm (opts) {
   if (!(this instanceof Swarm)) return new Swarm(opts)
   if (!opts) opts = {}
   var self = this
-  self.fs = opts.fs || require('./fs.js')
   self.level = opts.db || require('./db.js')(opts)
-  var drive = hyperdrive(self.level)
-  self.drive = drive
-  self.allPeers = {}
-  self.blacklist = {}
+  self.drive = hyperdrive(self.level)
   self.status = {}
 
   var discovery = opts.discovery !== false

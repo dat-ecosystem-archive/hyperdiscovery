@@ -21,7 +21,7 @@ test('replicates link properly', function (t) {
   var swarm2 = Swarm()
   swarm.link(FIXTURES_DIR, function (err, link) {
     t.ifError(err)
-    t.equals(link.length, 64)
+    t.equals(link.length, 64, 'link is correct length')
     swarm.join(link, FIXTURES_DIR, function (err) {
       t.ifError(err)
       swarm2.join(link, DOWNLOAD_DIR, function (err) {
