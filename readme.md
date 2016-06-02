@@ -1,13 +1,20 @@
-# hyperdrive-swarm
+# hyperdrive-archive-swarm
 
-Hosts a swarm for multiple hyperdrives.
+Join a hyperdrive archive's swarm.
 
 [![Travis](https://api.travis-ci.org/karissa/hyperdrive-swarm.svg)](https://travis-ci.org/karissa/hyperdrive-swarm)
 
-## `swarm.link(dir, opts, cb)`
+### `swarm(archive, opts)`
 
-Create a hyperdrive archive from files in `dir`.
+Join the p2p swarm for the given hyperdrive archive.
 
-## `swarm.join(link, dir, opts, cb)`
+##### Options
 
-Join an existing hyperdrive link and begin downloading or uploading contents in `dir`.
+  * `SIGNALHUB_URL`: the url of the signalhub.
+  * `SWARM_KEY`: the prefix for the archive's key
+
+Defaults from datland-swarm-defaults can also be overwritten:
+
+  * `dns.server`: DNS server
+  * `dns.domain`: DNS domain
+  * `dht.bootstrap`: distributed hash table bootstrapping nodes
