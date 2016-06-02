@@ -1,4 +1,4 @@
-if (window) var webRTCSwarm = require('webrtc-swarm')
+var webRTCSwarm = require('webrtc-swarm')
 var signalhub = require('signalhub')
 var events = require('events')
 var discoverySwarm = require('discovery-swarm')
@@ -11,7 +11,7 @@ module.exports = function (archive, opts) {
   if (!opts) opts = {}
   var swarmKey = (opts.SWARM_KEY || 'hyperdrive-') + archive.key.toString('hex')
 
-  if (window) {
+  if (process.browser) {
     var ws = webRTCSwarm(signalhub(swarmKey, opts.SIGNALHUB_URL || DEFAULT_SIGNALHUB))
     ws.on('peer', peer => {
       emitter.emit('peer', peer)
@@ -19,13 +19,15 @@ module.exports = function (archive, opts) {
     })
   }
 
-  var ds = discoverySwarm(swarmDefaults({
-    stream: peer => {
-      emitter.emit('peer', peer)
-      return archive.replicate()
-    }
-  }, opts))
-  ds.once('listening', () => ds.join(swarmKey))
-  ds.listen(0)
+  if (process.versions.node) {
+    var ds = discoverySwarm(swarmDefaults({
+      stream: peer => {
+        emitter.emit('peer', peer)
+        return archive.replicate()
+      }
+    }, opts))
+    ds.once('listening', () => ds.join(swarmKey))
+    ds.listen(0)
+  }
   return emitter
 }
