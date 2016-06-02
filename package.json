@@ -1,7 +1,7 @@
 {
   "name": "hyperdrive-archive-swarm",
   "version": "1.0.0",
-  "description": "[![NPM](https://nodei.co/npm/hyperdrive-swarm.png)](https://nodei.co/npm/hyperdrive-swarm/)",
+  "description": "Join the p2p swarm for the given hyperdrive archive",
   "main": "index.js",
   "scripts": {
   },
