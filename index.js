@@ -7,7 +7,7 @@ var swarmDefaults = require('datland-swarm-defaults')
 var DEFAULT_SIGNALHUB = 'https://signalhub.mafintosh.com'
 
 module.exports = function (archive, opts) {
-  var emitter = events.EventEmitter()
+  var emitter = new events.EventEmitter()
   if (!opts) opts = {}
   var swarmKey = (opts.SWARM_KEY || 'hyperdrive-') + archive.key.toString('hex')
 
@@ -27,4 +27,5 @@ module.exports = function (archive, opts) {
   }, opts))
   ds.once('listening', () => ds.join(swarmKey))
   ds.listen(0)
+  return emitter
 }
