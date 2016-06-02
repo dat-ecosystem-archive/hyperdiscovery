@@ -1,9 +1,9 @@
 # hyperdrive-archive-swarm
 
-Join a hyperdrive archive's swarm in the client and server.
+Join a hyperdrive archive's p2p swarm in the client and server.
 
 ```
-npm install hyperdrive-archive-swarmo
+npm install hyperdrive-archive-swarm
 ```
 
 ## Usage
