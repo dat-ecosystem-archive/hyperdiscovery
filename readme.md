@@ -2,8 +2,6 @@
 
 Join a hyperdrive archive's swarm.
 
-[![Travis](https://api.travis-ci.org/karissa/hyperdrive-swarm.svg)](https://travis-ci.org/karissa/hyperdrive-swarm)
-
 ### `swarm(archive, opts)`
 
 Join the p2p swarm for the given hyperdrive archive.
