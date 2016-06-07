@@ -13,7 +13,7 @@ module.exports = function (archive, opts) {
 
   if (process.browser) {
     var ws = webRTCSwarm(signalhub(swarmKey, opts.SIGNALHUB_URL || DEFAULT_SIGNALHUB))
-    ws.on('peer', peer => {
+    ws.on('peer', function (peer) {
       emitter.emit('peer', peer)
       peer.pipe(archive.replicate()).pipe(peer)
     })
@@ -21,12 +21,14 @@ module.exports = function (archive, opts) {
 
   if (process.versions.node) {
     var ds = discoverySwarm(swarmDefaults({
-      stream: peer => {
+      stream: function (peer) {
         emitter.emit('peer', peer)
         return archive.replicate()
       }
     }, opts))
-    ds.once('listening', () => ds.join(swarmKey))
+    ds.once('listening', function () {
+      ds.join(swarmKey)
+    })
     ds.listen(0)
   }
   return emitter
