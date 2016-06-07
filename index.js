@@ -3,6 +3,7 @@ var signalhub = require('signalhub')
 var events = require('events')
 var discoverySwarm = require('discovery-swarm')
 var swarmDefaults = require('datland-swarm-defaults')
+var hasWebRTC = !!require('get-browser-rtc')();
 
 var DEFAULT_SIGNALHUB = 'https://signalhub.mafintosh.com'
 
@@ -11,7 +12,7 @@ module.exports = function (archive, opts) {
   if (!opts) opts = {}
   var swarmKey = (opts.SWARM_KEY || 'dat-') + (archive.discoveryKey || archive.key).toString('hex')
 
-  if (process.browser) {
+  if (hasWebRTC) {
     var ws = webRTCSwarm(signalhub(swarmKey, opts.SIGNALHUB_URL || DEFAULT_SIGNALHUB))
     ws.on('peer', function (peer) {
       emitter.emit('peer', peer)

@@ -17,6 +17,7 @@
   "dependencies": {
     "datland-swarm-defaults": "^1.0.0",
     "discovery-swarm": "^3.1.2",
+    "get-browser-rtc": "^1.0.2",
     "signalhub": "^4.4.0",
     "webrtc-swarm": "^2.4.0"
   }
