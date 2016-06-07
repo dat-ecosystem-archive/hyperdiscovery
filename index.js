@@ -5,7 +5,10 @@ var discoverySwarm = require('discovery-swarm')
 var swarmDefaults = require('datland-swarm-defaults')
 var hasWebRTC = !!require('get-browser-rtc')();
 
-var DEFAULT_SIGNALHUB = 'https://signalhub.mafintosh.com'
+var DEFAULT_SIGNALHUB = [ // TODO: move these to dat.land
+  'https://datland-signalhub.mafintosh.com',
+  'https://signalhub.mafintosh.com'
+]
 
 module.exports = function (archive, opts) {
   var emitter = new events.EventEmitter()
