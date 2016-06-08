@@ -10,10 +10,10 @@ var DEFAULT_SIGNALHUB = 'https://signalhub.mafintosh.com'
 module.exports = function (archive, opts) {
   var emitter = new events.EventEmitter()
   if (!opts) opts = {}
-  var swarmKey = (opts.SWARM_KEY || 'dat-') + (archive.discoveryKey || archive.key).toString('hex')
+  var swarmKey = (opts.signalhubPrefix || 'dat-') + (archive.discoveryKey || archive.key).toString('hex')
 
   if (hasWebRTC) {
-    var ws = webRTCSwarm(signalhub(swarmKey, opts.SIGNALHUB_URL || DEFAULT_SIGNALHUB))
+    var ws = webRTCSwarm(signalhub(swarmKey, opts.signalhub || DEFAULT_SIGNALHUB))
     ws.on('peer', function (peer) {
       emitter.emit('peer', peer)
       peer.pipe(archive.replicate()).pipe(peer)

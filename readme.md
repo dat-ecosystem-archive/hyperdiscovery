@@ -16,7 +16,7 @@ var memdb = require('memdb')
 var swarm = require('hyperdrive-archive-swarm')
 
 var drive = hyperdrive(memdb())
-var archive = drive.createArchive("ARCHIVE_KEY")
+var archive = drive.createArchive('ARCHIVE_KEY')
 
 var sw = swarm(archive)
 sw.on('peer', function (peer) {
@@ -34,8 +34,8 @@ Join the p2p swarm for the given hyperdrive archive. The return object, `sw`, is
 
 ##### Options
 
-  * `SIGNALHUB_URL`: the url of the signalhub.
-  * `SWARM_KEY`: the prefix for the archive's key
+  * `signalhub`: the url of the signalhub.
+  * `signalhubPrefix`: the prefix for the archive's signalhub key
 
 Defaults from datland-swarm-defaults can also be overwritten:
 
