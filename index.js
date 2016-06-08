@@ -3,7 +3,7 @@ var signalhub = require('signalhub')
 var events = require('events')
 var discoverySwarm = require('discovery-swarm')
 var swarmDefaults = require('datland-swarm-defaults')
-var hasWebRTC = !!require('get-browser-rtc')();
+var hasWebRTC = !!require('get-browser-rtc')()
 
 var DEFAULT_SIGNALHUB = 'https://signalhub.mafintosh.com'
 
