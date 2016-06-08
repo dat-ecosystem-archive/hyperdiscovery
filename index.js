@@ -22,13 +22,14 @@ module.exports = function (archive, opts) {
 
   if (process.versions.node) {
     var ds = discoverySwarm(swarmDefaults({
+      hash: false,
       stream: function (peer) {
         emitter.emit('peer', peer)
         return archive.replicate()
       }
     }, opts))
     ds.once('listening', function () {
-      ds.join(swarmKey)
+      ds.join(archive.discoveryKey)
     })
     ds.listen(0)
   }
