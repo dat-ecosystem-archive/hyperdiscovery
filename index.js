@@ -1,37 +1,77 @@
 var webRTCSwarm = require('webrtc-swarm')
 var signalhub = require('signalhub')
+var pump = require('pump')
+var inherits = require('inherits')
 var events = require('events')
 var discoverySwarm = require('discovery-swarm')
 var swarmDefaults = require('datland-swarm-defaults')
-var hasWebRTC = !!require('get-browser-rtc')()
+var rtc = require('get-browser-rtc')
 
 var DEFAULT_SIGNALHUB = 'https://signalhub.mafintosh.com'
 
-module.exports = function (archive, opts) {
-  var emitter = new events.EventEmitter()
+function HyperdriveSwarm (archive, opts) {
+  if (!(this instanceof HyperdriveSwarm)) return new HyperdriveSwarm(archive, opts)
+  var self = this
+
   if (!opts) opts = {}
-  var swarmKey = (opts.signalhubPrefix || 'dat-') + (archive.discoveryKey || archive.key).toString('hex')
 
-  if (hasWebRTC) {
-    var ws = webRTCSwarm(signalhub(swarmKey, opts.signalhub || DEFAULT_SIGNALHUB))
-    ws.on('peer', function (peer) {
-      emitter.emit('peer', peer)
-      peer.pipe(archive.replicate()).pipe(peer)
-    })
-  }
+  self.connections = 0
+  self.signalhub = opts.signalhub || DEFAULT_SIGNALHUB
+  self.archive = archive
+  self.browser = null
+  self.node = null
+  self.opts = opts
+  if (opts.webrtc || !!rtc()) self._browser()
+  if (process.versions.node) self._node()
 
-  if (process.versions.node) {
-    var ds = discoverySwarm(swarmDefaults({
-      hash: false,
-      stream: function (peer) {
-        emitter.emit('peer', peer)
-        return archive.replicate()
-      }
-    }, opts))
-    ds.once('listening', function () {
-      ds.join(archive.discoveryKey)
-    })
-    ds.listen(0)
-  }
-  return emitter
+  events.EventEmitter.call(this)
 }
+
+inherits(HyperdriveSwarm, events.EventEmitter)
+
+HyperdriveSwarm.prototype._browser = function () {
+  var self = this
+  var swarmKey = (self.opts.signalhubPrefix || 'dat-') + self.archive.discoveryKey.toString('hex')
+  self.browser = webRTCSwarm(signalhub(swarmKey, self.signalhub), {wrtc: self.opts.wrtc})
+  self.browser.on('peer', function (conn) {
+    var peer = self.archive.replicate()
+    self.connections++
+    console.log(self.connections)
+    peer.on('close', function () { self.connections-- })
+    self.emit('connection', peer, {type: 'webrtc-swarm'})
+    pump(conn, peer, conn)
+  })
+  return self.browser
+}
+
+HyperdriveSwarm.prototype._node = function () {
+  var self = this
+
+  var swarm = discoverySwarm(swarmDefaults({
+    id: self.archive.id,
+    hash: false,
+    stream: function (peer) {
+      return self.archive.replicate()
+    }
+  }, self.opts))
+
+  swarm.on('connection', function (peer) {
+    self.connections++
+    peer.on('close', function () { self.connections-- })
+    self.emit('connection', peer, {type: 'discovery-swarm'})
+  })
+
+  swarm.on('listening', function () {
+    swarm.join(self.archive.discoveryKey)
+  })
+
+  swarm.once('error', function () {
+    swarm.listen(0)
+  })
+
+  swarm.listen(self.opts.port || 3282)
+  self.node = swarm
+  return swarm
+}
+
+module.exports = HyperdriveSwarm

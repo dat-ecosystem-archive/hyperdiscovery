@@ -1,6 +1,6 @@
 {
   "name": "hyperdrive-archive-swarm",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Join the p2p swarm for the given hyperdrive archive",
   "main": "index.js",
   "scripts": {},

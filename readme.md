@@ -19,18 +19,24 @@ var drive = hyperdrive(memdb())
 var archive = drive.createArchive('ARCHIVE_KEY')
 
 var sw = swarm(archive)
-sw.on('peer', function (peer) {
-  console.log('got', peer)
+sw.on('connection', function (peer, type) {
+  console.log('got', peer, type) // type is 'webrtc-swarm' or 'discovery-swarm'
+  console.log('connected to', sw.connections, 'peers')
+  peer.on('close', function () {
+    console.log('peer disconnected')
+  }) 
 })
 ```
 
-Will use `discovery-swarm`, `signalhub`, and `webrtc-swarm` whenever available to attempt to connect peers. Uses `datland-swarm-defaults` for peer introduction defaults on the server side, which can be overwritten (see below).
+Will use `discovery-swarm`, and `webrtc-swarm` whenever available to attempt to connect peers. Uses `datland-swarm-defaults` for peer introduction defaults on the server side, which can be overwritten (see below).
 
 ## API
 
 ### `var sw = swarm(archive, opts)`
 
 Join the p2p swarm for the given hyperdrive archive. The return object, `sw`, is an event emitter that will emit a `peer` event with the peer information when a peer is found.
+
+Get number of currently active connections with ```sw.connections```.
 
 ##### Options
 
