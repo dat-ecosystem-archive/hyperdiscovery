@@ -19,8 +19,17 @@ var drive = hyperdrive(memdb())
 var archive = drive.createArchive('ARCHIVE_KEY')
 
 var sw = swarm(archive)
-sw.on('peer', function (peer) {
+sw.on('connection', function (peer) {
   console.log('got', peer)
+  peer.on('close', function () {
+    console.log('peer disconnected')
+  }) 
+})
+sw.on('browser-connection', function (peer) {
+  console.log('got browser peer', peer)
+  peer.on('close', function () {
+    console.log('peer disconnected')
+  }) 
 })
 ```
 
