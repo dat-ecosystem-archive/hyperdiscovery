@@ -36,7 +36,7 @@ HyperdriveSwarm.prototype._browser = function () {
   self.browser.on('peer', function (peer) {
     self.connections++
     peer.on('close', function () { self.connections-- })
-    self.emit('browser-connection', peer)
+    self.emit('connection', peer, {type: 'webrtc-swarm'})
     pump(peer, self.archive.replicate(), peer)
   })
   return self.browser
@@ -56,7 +56,7 @@ HyperdriveSwarm.prototype._node = function () {
   swarm.on('connection', function (peer) {
     self.connections++
     peer.on('close', function () { self.connections-- })
-    self.emit('connection', peer)
+    self.emit('connection', peer, {type: 'discovery-swarm'})
   })
 
   swarm.on('listening', function () {

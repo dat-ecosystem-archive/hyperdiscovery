@@ -19,21 +19,15 @@ var drive = hyperdrive(memdb())
 var archive = drive.createArchive('ARCHIVE_KEY')
 
 var sw = swarm(archive)
-sw.on('connection', function (peer) {
-  console.log('got', peer)
-  peer.on('close', function () {
-    console.log('peer disconnected')
-  }) 
-})
-sw.on('browser-connection', function (peer) {
-  console.log('got browser peer', peer)
+sw.on('connection', function (peer, type) {
+  console.log('got', peer, type) // type is 'webrtc-swarm' or 'discovery-swarm'
   peer.on('close', function () {
     console.log('peer disconnected')
   }) 
 })
 ```
 
-Will use `discovery-swarm`, `signalhub`, and `webrtc-swarm` whenever available to attempt to connect peers. Uses `datland-swarm-defaults` for peer introduction defaults on the server side, which can be overwritten (see below).
+Will use `discovery-swarm`, and `webrtc-swarm` whenever available to attempt to connect peers. Uses `datland-swarm-defaults` for peer introduction defaults on the server side, which can be overwritten (see below).
 
 ## API
 
