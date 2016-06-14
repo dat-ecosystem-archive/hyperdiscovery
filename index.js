@@ -1,5 +1,6 @@
 var webRTCSwarm = require('webrtc-swarm')
 var signalhub = require('signalhub')
+var pump = require('pump')
 var inherits = require('inherits')
 var events = require('events')
 var discoverySwarm = require('discovery-swarm')
@@ -14,35 +15,38 @@ function HyperdriveSwarm (archive, opts) {
 
   if (!opts) opts = {}
 
-  self.swarmKey = (opts.signalhubPrefix || 'dat-') + archive.discoveryKey.toString('hex')
-  console.log(self.swarmKey)
+  self.connections = 0
   self.signalhub = opts.signalhub || DEFAULT_SIGNALHUB
   self.archive = archive
   self.browser = null
   self.node = null
   self.opts = opts
-  if (!!rtc()) self._browser(self.swarmKey)
-  if (process.versions.node) self._node(self.swarmKey)
+  if (!!rtc()) self._browser()
+  if (process.versions.node) self._node()
 
   events.EventEmitter.call(this)
 }
 
 inherits(HyperdriveSwarm, events.EventEmitter)
 
-HyperdriveSwarm.prototype._browser = function (swarmKey) {
+HyperdriveSwarm.prototype._browser = function () {
   var self = this
+  var swarmKey = (self.opts.signalhubPrefix || 'dat-') + self.archive.discoveryKey.toString('hex')
   self.browser = webRTCSwarm(signalhub(swarmKey, self.signalhub))
   self.browser.on('peer', function (peer) {
+    self.connections++
+    peer.on('close', function () { self.connections-- })
     self.emit('browser-connection', peer)
-    peer.pipe(self.archive.replicate()).pipe(peer)
+    pump(peer, self.archive.replicate(), peer)
   })
   return self.browser
 }
 
-HyperdriveSwarm.prototype._node = function (swarmKey) {
+HyperdriveSwarm.prototype._node = function () {
   var self = this
 
   var swarm = discoverySwarm(swarmDefaults({
+    id: self.archive.id,
     hash: false,
     stream: function (peer) {
       return self.archive.replicate()
@@ -50,11 +54,13 @@ HyperdriveSwarm.prototype._node = function (swarmKey) {
   }, self.opts))
 
   swarm.on('connection', function (peer) {
+    self.connections++
+    peer.on('close', function () { self.connections-- })
     self.emit('connection', peer)
   })
 
   swarm.on('listening', function () {
-    swarm.join(swarmKey)
+    swarm.join(self.archive.discoveryKey)
   })
 
   swarm.once('error', function () {
