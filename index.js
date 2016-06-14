@@ -18,7 +18,7 @@ function HyperdriveSwarm (archive, opts) {
   self.signalhub = opts.signalhub || DEFAULT_SIGNALHUB
   self.archive = archive
   self.browser = null
-  self.swarm = null
+  self.node = null
   if (!!rtc()) self._browser(self.swarmKey)
   if (process.versions.node) self._node(self.swarmKey)
 
@@ -31,6 +31,7 @@ HyperdriveSwarm.prototype._browser = function (swarmKey) {
   var self = this
   self.browser = webRTCSwarm(signalhub(swarmKey, self.signalhub))
   self.browser.on('peer', function (peer) {
+    self.emit('browser-connection', peer)
     peer.pipe(self.archive.replicate()).pipe(peer)
   })
   return self.browser
@@ -46,6 +47,10 @@ HyperdriveSwarm.prototype._node = function (swarmKey) {
     }
   }, opts))
 
+  swarm.on('connection', function (peer) {
+    self.emit('connection', peer)
+  })
+
   swarm.on('listening', function () {
     swarm.join(swarmKey)
   })
@@ -55,7 +60,7 @@ HyperdriveSwarm.prototype._node = function (swarmKey) {
   })
 
   swarm.listen(args.port || 3282)
-  self.swarm = swarm
+  self.node = swarm
   return swarm
 }
 
