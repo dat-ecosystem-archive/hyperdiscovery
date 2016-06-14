@@ -14,11 +14,13 @@ function HyperdriveSwarm (archive, opts) {
 
   if (!opts) opts = {}
 
-  self.swarmKey = (opts.signalhubPrefix || 'dat-') + archive.discoveryKey
+  self.swarmKey = (opts.signalhubPrefix || 'dat-') + archive.discoveryKey.toString('hex')
+  console.log(self.swarmKey)
   self.signalhub = opts.signalhub || DEFAULT_SIGNALHUB
   self.archive = archive
   self.browser = null
   self.node = null
+  self.opts = opts
   if (!!rtc()) self._browser(self.swarmKey)
   if (process.versions.node) self._node(self.swarmKey)
 
@@ -45,7 +47,7 @@ HyperdriveSwarm.prototype._node = function (swarmKey) {
     stream: function (peer) {
       return self.archive.replicate()
     }
-  }, opts))
+  }, self.opts))
 
   swarm.on('connection', function (peer) {
     self.emit('connection', peer)
@@ -59,7 +61,7 @@ HyperdriveSwarm.prototype._node = function (swarmKey) {
     swarm.listen(0)
   })
 
-  swarm.listen(args.port || 3282)
+  swarm.listen(self.opts.port || 3282)
   self.node = swarm
   return swarm
 }
