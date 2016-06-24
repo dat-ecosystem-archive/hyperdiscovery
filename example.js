@@ -11,7 +11,6 @@ archive.finalize(function () {
     console.log('connected to', sw.connections, 'peers')
     peer.on('close', function () {
       console.log('peer disconnected')
-    }) 
+    })
   })
 })
-

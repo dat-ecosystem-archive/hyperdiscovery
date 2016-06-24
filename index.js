@@ -5,9 +5,10 @@ var inherits = require('inherits')
 var events = require('events')
 var discoverySwarm = require('discovery-swarm')
 var swarmDefaults = require('datland-swarm-defaults')
-var rtc = require('get-browser-rtc')
 
 var DEFAULT_SIGNALHUB = 'https://signalhub.mafintosh.com'
+
+module.exports = HyperdriveSwarm
 
 function HyperdriveSwarm (archive, opts) {
   if (!(this instanceof HyperdriveSwarm)) return new HyperdriveSwarm(archive, opts)
@@ -21,13 +22,30 @@ function HyperdriveSwarm (archive, opts) {
   self.browser = null
   self.node = null
   self.opts = opts
-  if (opts.webrtc || !!rtc()) self._browser()
+  if (opts.webrtc || webRTCSwarm.WEBRTC_SUPPORT) self._browser()
   if (process.versions.node) self._node()
 
   events.EventEmitter.call(this)
 }
 
 inherits(HyperdriveSwarm, events.EventEmitter)
+
+HyperdriveSwarm.prototype.close = function (cb) {
+  if (cb) this.once('close', cb)
+  var self = this
+
+  var swarms = [this.node, this.browser].filter(Boolean)
+  swarms.forEach(function (swarm) {
+    swarm.once('close', function () {
+      var i = swarms.indexOf(swarm)
+      if (i > -1) swarms.splice(i, 1)
+      if (swarms.length === 0) self.emit('close')
+    })
+    process.nextTick(function () {
+      swarm.close()
+    })
+  })
+}
 
 HyperdriveSwarm.prototype._browser = function () {
   var self = this
@@ -36,7 +54,6 @@ HyperdriveSwarm.prototype._browser = function () {
   self.browser.on('peer', function (conn) {
     var peer = self.archive.replicate()
     self.connections++
-    console.log(self.connections)
     peer.on('close', function () { self.connections-- })
     self.emit('connection', peer, {type: 'webrtc-swarm'})
     pump(conn, peer, conn)
@@ -73,5 +90,3 @@ HyperdriveSwarm.prototype._node = function () {
   self.node = swarm
   return swarm
 }
-
-module.exports = HyperdriveSwarm
