@@ -22,7 +22,7 @@ function HyperdriveSwarm (archive, opts) {
   self.browser = null
   self.node = null
   self.opts = opts
-  if (opts.webrtc || webRTCSwarm.WEBRTC_SUPPORT) self._browser()
+  if (opts.wrtc || webRTCSwarm.WEBRTC_SUPPORT) self._browser()
   if (process.versions.node) self._node()
 
   events.EventEmitter.call(this)
