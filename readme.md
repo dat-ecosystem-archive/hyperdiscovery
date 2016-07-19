@@ -1,6 +1,6 @@
 # hyperdrive-archive-swarm
 
-Join a hyperdrive archive's p2p swarm in the client and server.
+Join a hyperdrive archive's & hypercore feed's p2p swarm in the client and server.
 
 ```
 npm install hyperdrive-archive-swarm
@@ -29,6 +29,18 @@ sw.on('connection', function (peer, type) {
 ```
 
 Will use `discovery-swarm`, and `webrtc-swarm` whenever available to attempt to connect peers. Uses `datland-swarm-defaults` for peer introduction defaults on the server side, which can be overwritten (see below).
+
+The module can also create and join a swarm for a hypercore feed:
+
+```js
+var hypercore = require('hypercore')
+var memdb = require('memdb')
+var swarm = require('hyperdrive-archive-swarm')
+
+var core = hypercore(memdb())
+var feed = core.createFeed()
+var sw = swarm(feed)
+```
 
 ## API
 
