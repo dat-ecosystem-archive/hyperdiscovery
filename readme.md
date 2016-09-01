@@ -55,6 +55,8 @@ Get number of currently active connections with ```sw.connections```.
   * `signalhub`: the url of the signalhub.
   * `signalhubPrefix`: the prefix for the archive's signalhub key
   * `wrtc`: a webrtc instance, e.g. electron-webrtc, if not natively supported
+  * `upload`: bool, upload data to the other peer?
+  * `download`: bool, download data from the other peer?
 
 Defaults from datland-swarm-defaults can also be overwritten:
 
