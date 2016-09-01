@@ -26,7 +26,8 @@ function HyperdriveSwarm (archive, opts) {
           upload: self.uploading,
           download: self.downloading
         })
-      }),
+      }
+    }),
     wrtc: opts.wrtc
   }
 
