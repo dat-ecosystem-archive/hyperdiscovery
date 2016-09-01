@@ -14,6 +14,7 @@ function HyperdriveSwarm (archive, opts) {
   this.archive = archive
   this.uploading = !(opts.upload === false)
   this.downloading = !(opts.download === false)
+  var self = this
   var swarmKey = (opts.signalhubPrefix || 'dat-') + archive.discoveryKey.toString('hex')
   var hybridOpts = {
     signalhub: signalhub(swarmKey, opts.signalhub || DEFAULT_SIGNALHUB),
@@ -22,8 +23,8 @@ function HyperdriveSwarm (archive, opts) {
       hash: false,
       stream: function (peer) {
         return archive.replicate({
-          upload: this.uploading,
-          download: this.downloading
+          upload: self.uploading,
+          download: self.downloading
         })
       }
     }, opts)
