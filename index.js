@@ -26,9 +26,12 @@ function HyperdriveSwarm (archive, opts) {
           upload: self.uploading,
           download: self.downloading
         })
-      }
+      },
+      utp: opts.utp,
+      tcp: opts.tcp
     }),
-    wrtc: opts.wrtc
+    wrtc: opts.wrtc,
+    port: opts.port
   }
 
   HybridSwarm.call(this, hybridOpts)
