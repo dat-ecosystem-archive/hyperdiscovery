@@ -57,6 +57,9 @@ Get number of currently active connections with ```sw.connections```.
   * `wrtc`: a webrtc instance, e.g. electron-webrtc, if not natively supported
   * `upload`: bool, upload data to the other peer?
   * `download`: bool, download data from the other peer?
+  * `port`: port for discovery swarm
+  * `utp`: use utp in discovery swarm
+  * `tcp`: use tcp in discovery swarm
 
 Defaults from datland-swarm-defaults can also be overwritten:
 
