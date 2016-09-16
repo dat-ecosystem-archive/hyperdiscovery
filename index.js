@@ -4,7 +4,10 @@ var swarmDefaults = require('datland-swarm-defaults')
 var inherits = require('inherits')
 var HybridSwarm = require('hybrid-swarm')
 
-var DEFAULT_SIGNALHUB = 'https://signalhub.mafintosh.com'
+var DEFAULT_SIGNALHUBS = [
+  'https://signalhub.mafintosh.com',
+  'https://signalhub.dat.land'
+]
 
 module.exports = HyperdriveSwarm
 
@@ -17,7 +20,7 @@ function HyperdriveSwarm (archive, opts) {
   var self = this
   var swarmKey = (opts.signalhubPrefix || 'dat-') + archive.discoveryKey.toString('hex')
   var hybridOpts = {
-    signalhub: signalhub(swarmKey, opts.signalhub || DEFAULT_SIGNALHUB),
+    signalhub: signalhub(swarmKey, opts.signalhub || [DEFAULT_SIGNALHUBS]),
     discovery: swarmDefaults({
       id: archive.id,
       hash: false,
