@@ -4,10 +4,7 @@ var swarmDefaults = require('datland-swarm-defaults')
 var inherits = require('inherits')
 var HybridSwarm = require('hybrid-swarm')
 
-var DEFAULT_SIGNALHUBS = [
-  'https://signalhub.mafintosh.com',
-  'https://signalhub.dat.land'
-]
+var DEFAULT_SIGNALHUBS = 'https://signalhub.mafintosh.com'
 
 module.exports = HyperdriveSwarm
 
