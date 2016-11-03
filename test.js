@@ -1,5 +1,4 @@
 var tape = require('tape')
-var webrtc = require('electron-webrtc')()
 var hypercore = require('hypercore')
 var memdb = require('memdb')
 var swarm = require('.')
@@ -12,8 +11,8 @@ tape('connect and close', function (t) {
 
   var feed1 = core1.createFeed()
   var feed2 = core2.createFeed(feed1.key)
-  var write = swarm(feed1, {webrtc})
-  var read = swarm(feed2, {webrtc})
+  var write = swarm(feed1)
+  var read = swarm(feed2)
 
   write.once('connection', function (peer, type) {
     t.ok(1, 'write connected')
@@ -21,7 +20,6 @@ tape('connect and close', function (t) {
       t.ok(1, 'write closed')
       read.close(function () {
         t.ok(1, 'read closed')
-        webrtc.close()
       })
     })
   })
