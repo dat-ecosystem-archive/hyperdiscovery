@@ -18,10 +18,7 @@
   "homepage": "https://github.com/karissa/hyperdrive-archive-swarm#readme",
   "dependencies": {
     "datland-swarm-defaults": "^1.0.0",
-    "hybrid-swarm": "^1.0.0",
-    "inherits": "^2.0.1",
-    "pump": "^1.0.1",
-    "signalhub": "^4.7.4"
+    "discovery-swarm": "^4.0.2"
   },
   "devDependencies": {
     "hypercore": "^4.11.0",
