@@ -1,6 +1,6 @@
 # hyperdrive-archive-swarm
 
-Join a hyperdrive archive's & hypercore feed's p2p swarm in the client and server.
+Join a hyperdrive archive's & hypercore feed's p2p swarm.
 
 ```
 npm install hyperdrive-archive-swarm
@@ -24,7 +24,7 @@ sw.on('connection', function (peer, type) {
   console.log('connected to', sw.connections, 'peers')
   peer.on('close', function () {
     console.log('peer disconnected')
-  }) 
+  })
 })
 ```
 
@@ -48,13 +48,16 @@ var sw = swarm(feed)
 
 Join the p2p swarm for the given hyperdrive archive. The return object, `sw`, is an event emitter that will emit a `peer` event with the peer information when a peer is found.
 
-Get number of currently active connections with ```sw.connections```.
+### sw.connections
+
+Get number of currently active connections.
+
+## sw.swarm
+
+Get the original discovery-swarm instance.
 
 ##### Options
 
-  * `signalhub`: the url of the signalhub.
-  * `signalhubPrefix`: the prefix for the archive's signalhub key
-  * `wrtc`: a webrtc instance, e.g. electron-webrtc, if not natively supported
   * `upload`: bool, upload data to the other peer?
   * `download`: bool, download data from the other peer?
   * `port`: port for discovery swarm
