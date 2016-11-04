@@ -21,7 +21,7 @@ var archive = drive.createArchive('ARCHIVE_KEY')
 var sw = swarm(archive)
 sw.on('connection', function (peer, type) {
   console.log('got', peer, type) // type is 'webrtc-swarm' or 'discovery-swarm'
-  console.log('connected to', sw.connections, 'peers')
+  console.log('connected to', sw.connections.length, 'peers')
   peer.on('close', function () {
     console.log('peer disconnected')
   })
@@ -50,11 +50,7 @@ Join the p2p swarm for the given hyperdrive archive. The return object, `sw`, is
 
 ### sw.connections
 
-Get number of currently active connections.
-
-## sw.swarm
-
-Get the original discovery-swarm instance.
+Get the list of currently active connections.
 
 ##### Options
 
