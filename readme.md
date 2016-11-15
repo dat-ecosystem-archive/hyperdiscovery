@@ -1,5 +1,7 @@
 # hyperdrive-archive-swarm
 
+[![Travis](https://api.travis-ci.org/karissa/hyperdrive-archive-swarm.svg)](https://travis-ci.org/karissa/hyperdrive-archive-swarm) 
+
 Join a hyperdrive archive's & hypercore feed's p2p swarm.
 
 ```
