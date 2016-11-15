@@ -10,7 +10,6 @@ function HyperdriveSwarm (archive, opts) {
   this.uploading = !(opts.upload === false)
   this.downloading = !(opts.download === false)
   var self = this
-  self.connections = 0
   this.swarm = disc(swarmDefaults({
     id: archive.id,
     hash: false,
@@ -26,13 +25,6 @@ function HyperdriveSwarm (archive, opts) {
   this.swarm.on('listening', function () {
     self.swarm.join(self.archive.discoveryKey)
   })
-  this.swarm.on('connection', function (conn) {
-    self.connections = self.swarm.connections.length
-    conn.on('close', function () {
-      self.connections = self.swarm.connections.length
-    })
-  })
-  this.connections = this.swarm.connections
 
   this.swarm.listen(opts.port || 3282)
   this.swarm.once('error', function () {
