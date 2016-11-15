@@ -23,7 +23,9 @@ function HyperdriveSwarm (archive, opts) {
     utp: opts.utp,
     tcp: opts.tcp
   }))
-  this.swarm.join(this.archive.discoveryKey)
+  this.swarm.on('listening', function () {
+    self.swarm.join(self.archive.discoveryKey)
+  })
   this.swarm.on('connection', function (conn) {
     self.connections = self.swarm.connections.length
     conn.on('close', function () {
@@ -31,5 +33,10 @@ function HyperdriveSwarm (archive, opts) {
     })
   })
   this.connections = this.swarm.connections
+
+  this.swarm.listen(opts.port || 3282)
+  this.swarm.once('error', function () {
+    self.swarm.listen(0)
+  })
   return this.swarm
 }

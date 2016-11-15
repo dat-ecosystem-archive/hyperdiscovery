@@ -28,7 +28,7 @@ sw.on('connection', function (peer, type) {
 })
 ```
 
-Will use `discovery-swarm`, and `webrtc-swarm` whenever available to attempt to connect peers. Uses `datland-swarm-defaults` for peer introduction defaults on the server side, which can be overwritten (see below).
+Will use `discovery-swarm` to attempt to connect peers. Uses `datland-swarm-defaults` for peer introduction defaults on the server side, which can be overwritten (see below).
 
 The module can also create and join a swarm for a hypercore feed:
 
