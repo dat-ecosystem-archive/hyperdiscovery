@@ -22,13 +22,12 @@ function HyperdriveSwarm (archive, opts) {
     utp: opts.utp,
     tcp: opts.tcp
   }))
-  this.swarm.on('listening', function () {
-    self.swarm.join(self.archive.discoveryKey)
-  })
 
-  this.swarm.listen(opts.port || 3282)
   this.swarm.once('error', function () {
     self.swarm.listen(0)
   })
+  this.swarm.listen(opts.port || 3282)
+  this.swarm.join(this.archive.discoveryKey)
+  
   return this.swarm
 }
