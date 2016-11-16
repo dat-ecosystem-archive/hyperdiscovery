@@ -28,6 +28,6 @@ function HyperdriveSwarm (archive, opts) {
   })
   this.swarm.listen(opts.port || 3282)
   this.swarm.join(this.archive.discoveryKey)
-  
+
   return this.swarm
 }
