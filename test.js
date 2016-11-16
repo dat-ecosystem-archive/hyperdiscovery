@@ -15,33 +15,31 @@ function getSwarms (opts) {
 }
 
 tape('connect and close', function (t) {
-  t.plan(8)
+  t.plan(6)
   var swarms = getSwarms()
 
   var write = swarms[0]
   var read = swarms[1]
 
-  write.once('connection', function (peer, type) {
+  write.on('connection', function (peer, type) {
     t.ok(1, 'write connected')
     t.equals(write.connections.length, 1)
     write.close(function () {
       t.ok(1, 'write closed')
       read.close(function () {
-        t.equals(write.connections.length, 0)
-        t.equals(read.connections.length, 0)
         t.ok(1, 'read closed')
       })
     })
   })
 
-  read.once('connection', function (peer, type) {
+  read.on('connection', function (peer, type) {
     t.ok(1, 'read connected')
     t.equals(read.connections.length, 1)
   })
 })
 
 tape('connect without utp', function (t) {
-  t.plan(8)
+  t.plan(6)
   var swarms = getSwarms({utp: false})
 
   var write = swarms[0]
@@ -53,8 +51,6 @@ tape('connect without utp', function (t) {
     write.close(function () {
       t.ok(1, 'write closed')
       read.close(function () {
-        t.equals(write.connections.length, 0)
-        t.equals(read.connections.length, 0)
         t.ok(1, 'read closed')
       })
     })
@@ -62,6 +58,6 @@ tape('connect without utp', function (t) {
 
   read.once('connection', function (peer, type) {
     t.ok(1, 'read connected')
-    t.equals(read.connections.length, 1)
+    t.equals(read.connections.length, 1, 'connection length')
   })
 })
