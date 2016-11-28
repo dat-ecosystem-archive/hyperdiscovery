@@ -1,6 +1,6 @@
 # hyperdiscovery
 
-[![Travis](https://api.travis-ci.org/karissa/hyperdrive-archive-swarm.svg)](https://travis-ci.org/karissa/hyperdrive-archive-swarm) 
+[![Travis](https://api.travis-ci.org/karissa/hyperdiscovery)](https://travis-ci.org/karissa/hyperdiscovery)
 
 Join the p2p swarm for hypercore and hyperdrive feeds.
 
