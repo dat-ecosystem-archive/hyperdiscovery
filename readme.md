@@ -1,11 +1,11 @@
-# hyperdrive-archive-swarm
+# hyperdiscovery
 
 [![Travis](https://api.travis-ci.org/karissa/hyperdrive-archive-swarm.svg)](https://travis-ci.org/karissa/hyperdrive-archive-swarm) 
 
-Join a hyperdrive archive's & hypercore feed's p2p swarm.
+Join the p2p swarm for hypercore and hyperdrive feeds.
 
 ```
-npm install hyperdrive-archive-swarm
+npm install hyperdiscovery
 ```
 
 ## Usage
@@ -15,7 +15,7 @@ Run the following code in two different places and they will replicate the conte
 ```js
 var hyperdrive = require('hyperdrive')
 var memdb = require('memdb')
-var swarm = require('hyperdrive-archive-swarm')
+var swarm = require('hyperdiscovery')
 
 var drive = hyperdrive(memdb())
 var archive = drive.createArchive('ARCHIVE_KEY')
@@ -37,7 +37,7 @@ The module can also create and join a swarm for a hypercore feed:
 ```js
 var hypercore = require('hypercore')
 var memdb = require('memdb')
-var swarm = require('hyperdrive-archive-swarm')
+var swarm = require('hyperdiscovery')
 
 var core = hypercore(memdb())
 var feed = core.createFeed()
@@ -48,7 +48,7 @@ var sw = swarm(feed)
 
 ### `var sw = swarm(archive, opts)`
 
-Join the p2p swarm for the given hyperdrive archive. The return object, `sw`, is an event emitter that will emit a `peer` event with the peer information when a peer is found.
+Join the p2p swarm for the given feed. The return object, `sw`, is an event emitter that will emit a `peer` event with the peer information when a peer is found.
 
 ### sw.connections
 

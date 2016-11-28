@@ -1,21 +1,21 @@
 {
-  "name": "hyperdrive-archive-swarm",
-  "version": "5.0.4",
-  "description": "Join the p2p swarm for the given hyperdrive archive",
+  "name": "hyperdiscovery",
+  "version": "1.0.0",
+  "description": "Join the p2p swarm for hypercore and hyperdrive feeds.",
   "main": "index.js",
   "scripts": {
     "test": "standard && node test.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/karissa/hyperdrive-archive-swarm.git"
+    "url": "git+https://github.com/karissa/hyperdiscovery.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/karissa/hyperdrive-archive-swarm/issues"
+    "url": "https://github.com/karissa/hyperdiscovery/issues"
   },
-  "homepage": "https://github.com/karissa/hyperdrive-archive-swarm#readme",
+  "homepage": "https://github.com/karissa/hyperdiscovery#readme",
   "dependencies": {
     "datland-swarm-defaults": "^1.0.0",
     "discovery-swarm": "^4.0.2"
