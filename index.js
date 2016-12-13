@@ -10,24 +10,19 @@ function HyperdriveSwarm (archive, opts) {
   this.uploading = !(opts.upload === false)
   this.downloading = !(opts.download === false)
   var self = this
-  this.swarm = disc(swarmDefaults({
-    id: archive.id,
-    hash: false,
-    stream: function (peer) {
-      return archive.replicate({
-        upload: self.uploading,
-        download: self.downloading
-      })
-    },
-    utp: opts.utp,
-    tcp: opts.tcp
-  }))
-
+  opts.id = archive.id
+  opts.hash = false
+  opts.stream = function (peer) {
+    return archive.replicate({
+      upload: self.uploading,
+      download: self.downloading
+    })
+  }
+  this.swarm = disc(swarmDefaults(opts))
   this.swarm.once('error', function () {
     self.swarm.listen(0)
   })
   this.swarm.listen(opts.port || 3282)
   this.swarm.join(this.archive.discoveryKey)
-
   return this.swarm
 }
