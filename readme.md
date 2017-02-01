@@ -2,7 +2,8 @@
 
 [![Travis](https://api.travis-ci.org/karissa/hyperdiscovery)](https://travis-ci.org/karissa/hyperdiscovery)
 
-Join the p2p swarm for hypercore and hyperdrive feeds.
+Join the p2p swarm for [hypercore][core] and [hyperdrive][drive] feeds. Uses
+[discovery-swarm][swarm] under the hood.
 
 ```
 npm install hyperdiscovery
@@ -54,6 +55,10 @@ Join the p2p swarm for the given feed. The return object, `sw`, is an event emit
 
 Get the list of currently active connections.
 
+### sw.close()
+
+Exit the swarm
+
 ##### Options
 
   * `upload`: bool, upload data to the other peer?
@@ -67,3 +72,15 @@ Defaults from datland-swarm-defaults can also be overwritten:
   * `dns.server`: DNS server
   * `dns.domain`: DNS domain
   * `dht.bootstrap`: distributed hash table bootstrapping nodes
+
+## See Also
+- [mafintosh/hypercore][core]
+- [mafintosh/hyperdrive][drive]
+- [mafintosh/discovery-swarm][swarm]
+
+## License
+ISC
+
+[core]: https://github.com/mafintosh/hypercore
+[drive]: https://github.com/mafintosh/hyperdrive
+[swarm]: https://github.com/mafintosh/discovery-swarm
