@@ -13,7 +13,7 @@ function HyperdriveSwarm (archive, opts) {
   var self = this
   opts.id = archive.id
   opts.hash = false
-  opts.stream = function (peer) {
+  opts.stream = opts.stream || function (peer) {
     return archive.replicate({
       live: self.live,
       upload: self.uploading,
