@@ -9,11 +9,13 @@ function HyperdriveSwarm (archive, opts) {
   this.archive = archive
   this.uploading = !(opts.upload === false)
   this.downloading = !(opts.download === false)
+  this.live = !!opts.live
   var self = this
   opts.id = archive.id
   opts.hash = false
   opts.stream = function (peer) {
     return archive.replicate({
+      live: self.live,
       upload: self.uploading,
       download: self.downloading
     })
