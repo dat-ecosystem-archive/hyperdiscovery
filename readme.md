@@ -23,7 +23,7 @@ var archive = drive.createArchive('ARCHIVE_KEY')
 
 var sw = swarm(archive)
 sw.on('connection', function (peer, type) {
-  console.log('got', peer, type) // type is 'webrtc-swarm' or 'discovery-swarm'
+  console.log('got', peer, type) 
   console.log('connected to', sw.connections.length, 'peers')
   peer.on('close', function () {
     console.log('peer disconnected')
