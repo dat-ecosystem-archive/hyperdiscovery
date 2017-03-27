@@ -61,6 +61,7 @@ Exit the swarm
 
 ##### Options
 
+  * `stream`: function, replication stream for connection. Default is `archive.replicate({live, upload, download})`.
   * `upload`: bool, upload data to the other peer?
   * `download`: bool, download data from the other peer?
   * `port`: port for discovery swarm
