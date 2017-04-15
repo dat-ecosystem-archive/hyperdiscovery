@@ -4,7 +4,7 @@
   "description": "Join the p2p swarm for hypercore and hyperdrive feeds.",
   "main": "index.js",
   "scripts": {
-    "test": "standard && node test.js"
+    "test": "standard && dependency-check . && node test.js"
   },
   "repository": {
     "type": "git",
@@ -19,11 +19,11 @@
   "dependencies": {
     "datland-swarm-defaults": "^1.0.0",
     "discovery-swarm": "^4.0.2",
-    "hypercore": "^5.11.0",
     "xtend": "^4.0.1"
   },
   "devDependencies": {
-    "hypercore": "^4.11.0",
+    "dependency-check": "^2.8.0",
+    "hypercore": "^5.11.0",
     "hyperdrive": "^8.2.1",
     "random-access-memory": "^2.4.0",
     "standard": "^7.1.2",
