@@ -1,10 +1,12 @@
 var hyperdrive = require('hyperdrive')
-var memdb = require('memdb')
+var ram = require('random-access-memory')
 var swarm = require('.')
 
-var drive = hyperdrive(memdb())
-var archive = drive.createArchive()
-archive.finalize(function () {
+var key = process.argv[2] && new Buffer(process.argv[2], 'hex')
+var archive = hyperdrive(ram, key)
+archive.ready(function (err) {
+  if (err) throw err
+  console.log('key', archive.key.toString('hex'))
   var sw = swarm(archive)
   sw.on('connection', function (peer, type) {
     console.log('got', peer, type) // type is 'webrtc-swarm' or 'discovery-swarm'
