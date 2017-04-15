@@ -1,6 +1,6 @@
 {
   "name": "hyperdiscovery",
-  "version": "1.3.0",
+  "version": "2.0.0",
   "description": "Join the p2p swarm for hypercore and hyperdrive feeds.",
   "main": "index.js",
   "scripts": {
