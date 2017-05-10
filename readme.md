@@ -15,12 +15,9 @@ Run the following code in two different places and they will replicate the conte
 
 ```js
 var hyperdrive = require('hyperdrive')
-var memdb = require('memdb')
 var swarm = require('hyperdiscovery')
 
-var drive = hyperdrive(memdb())
-var archive = drive.createArchive('ARCHIVE_KEY')
-
+var archive = hyperdrive('./database', 'ARCHIVE_KEY')
 var sw = swarm(archive)
 sw.on('connection', function (peer, type) {
   console.log('got', peer, type) 
@@ -37,11 +34,9 @@ The module can also create and join a swarm for a hypercore feed:
 
 ```js
 var hypercore = require('hypercore')
-var memdb = require('memdb')
 var swarm = require('hyperdiscovery')
 
-var core = hypercore(memdb())
-var feed = core.createFeed()
+var feed = hypercore('/feed')
 var sw = swarm(feed)
 ```
 
