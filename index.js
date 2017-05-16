@@ -33,8 +33,6 @@ function HyperdriveSwarm (archive, opts) {
     self.swarm.listen(0)
   })
   this.swarm.listen(opts.port)
-  archive.on('ready', function () {
-    self.swarm.join(self.archive.discoveryKey)
-  })
+  this.swarm.join(this.archive.discoveryKey)
   return this.swarm
 }
