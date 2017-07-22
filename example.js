@@ -1,6 +1,7 @@
 var hyperdrive = require('hyperdrive')
 var ram = require('random-access-memory')
 var swarm = require('.')
+var Buffer = require('safe-buffer').Buffer
 
 var key = process.argv[2] && new Buffer(process.argv[2], 'hex')
 var archive = hyperdrive(ram, key)

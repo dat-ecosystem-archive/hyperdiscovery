@@ -10,7 +10,8 @@ function getSwarms (opts, cb) {
     feed2.once('ready', function () {
       var write = swarm(feed1, opts)
       var read = swarm(feed2, opts)
-      cb([write, read])
+      var swarms = [write, read]
+      cb(swarms)
     })
   })
 }
