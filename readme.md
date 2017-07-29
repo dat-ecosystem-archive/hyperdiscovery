@@ -1,6 +1,6 @@
 # hyperdiscovery
 
-[![Travis](https://api.travis-ci.org/karissa/hyperdiscovery)](https://travis-ci.org/karissa/hyperdiscovery)
+[![build status](https://travis-ci.org/karissa/hyperdiscovery.svg?branch=master)](http://travis-ci.org/karissa/hyperdiscovery)
 
 Join the p2p swarm for [hypercore][core] and [hyperdrive][drive] feeds. Uses
 [discovery-swarm][swarm] under the hood.
