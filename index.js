@@ -12,7 +12,7 @@ function HyperdriveSwarm (archive, opts) {
   this.archive = archive
   this.uploading = !(opts.upload === false)
   this.downloading = !(opts.download === false)
-  this.live = !!opts.live
+  this.live = !(opts.live === false)
 
   // Discovery Swarm Options
   opts = xtend({
