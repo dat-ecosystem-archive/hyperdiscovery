@@ -2,7 +2,7 @@
 
 [![build status](https://travis-ci.org/karissa/hyperdiscovery.svg?branch=master)](http://travis-ci.org/karissa/hyperdiscovery)
 
-Join the p2p swarm for [hypercore][core] and [hyperdrive][drive] feeds. Uses
+Join the p2p swarm for [hypercore][core], [hyperdrive][drive], and [hyperdb][db] feeds. Uses
 [discovery-swarm][swarm] under the hood.
 
 ```
@@ -39,6 +39,20 @@ var swarm = require('hyperdiscovery')
 var feed = hypercore('/feed')
 var sw = swarm(feed)
 ```
+
+The module can also create and join a swarm for a hyperdb feed:
+
+```js
+var hyperdb = require('hyperdb')
+var swarm = require('hyperdiscovery')
+
+var db = hyperdb('/feed', 'ARCHIVE_KEY')
+db.on('ready', function() {
+  var sw = swarm(db)
+})
+```
+
+A hyperdb database must be ready before attempting to connect to the swarm. By default the swarm will `db.authorize()` all connecting peers. Auto authorization can be disabled using the `authorize` option (details below).
 
 ## API
 
@@ -79,4 +93,5 @@ ISC
 
 [core]: https://github.com/mafintosh/hypercore
 [drive]: https://github.com/mafintosh/hyperdrive
+[db]: https://github.com/mafintosh/hyperdb
 [swarm]: https://github.com/mafintosh/discovery-swarm
