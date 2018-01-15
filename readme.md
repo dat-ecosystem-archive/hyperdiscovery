@@ -52,7 +52,7 @@ db.on('ready', function() {
 })
 ```
 
-A hyperdb database must be ready before attempting to connect to the swarm. By default the swarm will `db.authorize()` all connecting peers. Auto authorization can be disabled using the `authorize` option (details below).
+A hyperdb database must be ready before attempting to connect to the swarm. When `download` is enabled the swarm will automatically `db.authorize()` all connecting peers.
 
 ## API
 
