@@ -100,32 +100,29 @@ tape('hyperdb two-way sync', function (t) {
     var right = dbs[1]
     var leftSwarm = swarms[0]
     var rightSwarm = swarms[1]
-    var delay = 50
-    var missing = 2
+    var debounceWindow = 1000
 
-    testSettingValue(left, right, '/left', 'left to right', done)
-    testSettingValue(right, left, '/right', 'right to left', done)
+    testSettingValue(left, right, '/left', 'left to right', function () {
+      testSettingValue(right, left, '/right', 'right to left', function () {
+        leftSwarm.close(function () {
+          t.ok(1, 'left closed')
+          rightSwarm.close(function () {
+            t.ok(1, 'right closed')
+          })
+        })
+      })
+    })
 
     function testSettingValue (src, dest, key, expectedValue, cb) {
       src.put(key, expectedValue, function (err) {
         if (err) throw err
-        setTimeout(function () {
+        dest.on('download', debounce(function () {
           getDbValues(src, dest, key, function (srcVal, destVal) {
             t.is(srcVal, expectedValue)
             t.is(destVal, expectedValue)
             cb()
           })
-        }, delay)
-      })
-    }
-
-    function done () {
-      if (--missing) return
-      leftSwarm.close(function () {
-        t.ok(1, 'left closed')
-        rightSwarm.close(function () {
-          t.ok(1, 'right closed')
-        })
+        }, debounceWindow))
       })
     }
   })
@@ -147,5 +144,19 @@ function getDbValues (src, dest, key, cb) {
   function done () {
     if (!srcValue || !destValue) return
     cb(srcValue, destValue)
+  }
+}
+
+function debounce (fn, delay) {
+  var timeout
+  return function () {
+    var _this = this
+    var args = arguments
+
+    clearTimeout(timeout)
+    timeout = setTimeout(function () {
+      timeout = null
+      fn.apply(_this, args)
+    }, delay)
   }
 }
