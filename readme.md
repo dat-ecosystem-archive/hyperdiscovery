@@ -86,6 +86,7 @@ Defaults from datland-swarm-defaults can also be overwritten:
 ## See Also
 - [mafintosh/hypercore][core]
 - [mafintosh/hyperdrive][drive]
+- [mafintosh/hyperdb][db]
 - [mafintosh/discovery-swarm][swarm]
 
 ## License
