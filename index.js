@@ -1,7 +1,6 @@
 var swarmDefaults = require('dat-swarm-defaults')
 var disc = require('discovery-swarm')
 var xtend = require('xtend')
-// var debug = require('debug')('hyperdiscovery')
 
 module.exports = HyperdriveSwarm
 
@@ -43,16 +42,6 @@ function HyperdriveSwarm (archive, opts) {
     self.swarm.listen(0)
   })
 
-  // Authorize peer connections if download is enabled...
-  this.downloading && this.swarm.on('connection', function (peer) {
-    if (peer.remoteUserData) {
-      archive.authorize(peer.remoteUserData, function () {
-        // debug(`Peer "${peer.remoteUserData.toString('hex')}" authenticated`);
-      })
-    } else {
-      // debug(`Attempted to authorize peer without key (${peer})`);
-    }
-  })
   this.swarm.listen(opts.port)
   this.swarm.join(this.archive.discoveryKey)
   return this.swarm
