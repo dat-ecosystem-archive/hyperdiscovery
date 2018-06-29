@@ -13,7 +13,6 @@ function HyperdriveSwarm (archive, opts) {
   this.uploading = !(opts.upload === false)
   this.downloading = !(opts.download === false)
   this.live = !(opts.live === false)
-  this.authorize = !(opts.authorize === false)
 
   var isHyperdbInstance = !!(archive.get && archive.put && archive.replicate && archive.authorize)
 
