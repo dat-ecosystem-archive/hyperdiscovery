@@ -1,4 +1,4 @@
-var swarmDefaults = require('datland-swarm-defaults')
+var swarmDefaults = require('dat-swarm-defaults')
 var disc = require('discovery-swarm')
 var xtend = require('xtend')
 // var debug = require('debug')('hyperdiscovery')
