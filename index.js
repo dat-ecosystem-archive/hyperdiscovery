@@ -14,17 +14,25 @@ function HyperdriveSwarm (archive, opts) {
   this.downloading = !(opts.download === false)
   this.live = !(opts.live === false)
 
+  var isHyperdbInstance = !!(archive.get && archive.put && archive.replicate && archive.authorize)
+
+  if (isHyperdbInstance && !archive.local) {
+    throw new Error('hyperdiscovery swarm must be created after the local hyperdb instance is ready!')
+  }
+
   // Discovery Swarm Options
   opts = xtend({
     port: 3282,
-    id: archive.id,
+    id: isHyperdbInstance ? archive.local.id.toString('hex') : archive.id,
     hash: false,
     stream: function (peer) {
-      return archive.replicate({
+      return archive.replicate(xtend({
         live: self.live,
         upload: self.uploading,
         download: self.downloading
-      })
+      }, isHyperdbInstance ? {
+        userData: archive.local.key
+      } : {}))
     }
   }, opts)
 
@@ -32,6 +40,7 @@ function HyperdriveSwarm (archive, opts) {
   this.swarm.once('error', function () {
     self.swarm.listen(0)
   })
+
   this.swarm.listen(opts.port)
   this.swarm.join(this.archive.discoveryKey)
   return this.swarm
