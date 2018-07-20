@@ -52,7 +52,7 @@ db.on('ready', function() {
 })
 ```
 
-A hyperdb database must be ready before attempting to connect to the swarm. When `download` is enabled the swarm will automatically `db.authorize()` all connecting peers.
+A hyperdb database must be ready before attempting to connect to the swarm.
 
 ## API
 
