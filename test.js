@@ -18,9 +18,9 @@ function getHypercoreSwarms (opts, cb) {
 }
 
 function getDbSwarms (opts, cb) {
-  var db1 = hyperdb(ram, {valueEncoding: 'utf-8'})
+  var db1 = hyperdb(ram, { valueEncoding: 'utf-8' })
   db1.once('ready', function () {
-    var db2 = hyperdb(ram, db1.key, {valueEncoding: 'utf-8'})
+    var db2 = hyperdb(ram, db1.key, { valueEncoding: 'utf-8' })
     db2.once('ready', function () {
       var write = swarm(db1, opts)
       var read = swarm(db2, opts)
@@ -63,7 +63,7 @@ tape('connect and close', function (t) {
 
 tape('connect without utp', function (t) {
   t.plan(6)
-  getHypercoreSwarms({utp: false}, function (swarms) {
+  getHypercoreSwarms({ utp: false }, function (swarms) {
     var write = swarms[0]
     var read = swarms[1]
     var missing = 2
