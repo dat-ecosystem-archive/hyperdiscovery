@@ -20,6 +20,7 @@
     "dat-encoding": "^5.0.1",
     "dat-swarm-defaults": "^1.0.2",
     "discovery-swarm": "^5.1.4",
+    "get-port": "^4.2.0",
     "hypercore-protocol": "^6.9.0",
     "mutexify": "^1.2.0",
     "safe-buffer": "^5.1.2",
