@@ -177,7 +177,6 @@ class Hyperdiscovery extends EventEmitter {
   }
 
   listen (port) {
-    console.log('listen', port)
     port = port || this.port
     this._swarm.listen(port)
     return new Promise(resolve => {
