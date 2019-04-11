@@ -16,8 +16,13 @@ const DAT_SWARM_PORT = 3282
 const PORT_ALTS = [3000,3002,3004,2001,2003,2005]
 
 class Hyperdiscovery extends EventEmitter {
-  constructor (opts) {
+  constructor (feed, opts) {
     super()
+
+    if (feed && !feed.replicate) {
+      opts = feed
+      feed = null
+    }
     opts = opts || {}
 
     this._opts = opts
@@ -70,6 +75,10 @@ class Hyperdiscovery extends EventEmitter {
 
     if (opts.autoListen !== false) {
       this.listen()
+    }
+
+    if (feed) {
+      this.add(feed)
     }
   }
 
@@ -163,6 +172,7 @@ class Hyperdiscovery extends EventEmitter {
   }
 
   add (feed) {
+    if (!feed.key) return feed.ready(() => { this.add(feed) })
     const key = datEncoding.toStr(feed.key)
     const discoveryKey = datEncoding.toStr(feed.discoveryKey)
     this._replicatingFeeds.set(discoveryKey, feed)

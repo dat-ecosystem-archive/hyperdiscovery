@@ -15,10 +15,10 @@ Run the following code in two different places and they will replicate the conte
 
 ```js
 var hyperdrive = require('hyperdrive')
-var swarm = require('hyperdiscovery')
+var Discovery = require('hyperdiscovery')
 
 var archive = hyperdrive('./database', 'ARCHIVE_KEY')
-var sw = swarm(archive)
+var sw = Discovery(archive)
 sw.on('connection', function (peer, type) {
   console.log('got', peer, type) 
   console.log('connected to', sw.connections.length, 'peers')

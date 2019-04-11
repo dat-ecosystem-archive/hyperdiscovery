@@ -6,11 +6,11 @@ var Discovery = require('.')
 var key = process.argv[2]
 var archive = hyperdrive(ram, key)
 var archive2 = hyperdrive(ram)
-var discovery = Discovery()
+var discovery = Discovery(archive)
 
 archive.ready(function (err) {
   if (err) throw err
-  discovery.add(archive)
+  // discovery.add(archive)
   console.log('key', archive.key.toString('hex'))
 })
 archive2.ready(function (err) {
