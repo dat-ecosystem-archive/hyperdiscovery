@@ -12,10 +12,16 @@ const debug = require('debug')('hyperdiscovery')
 
 module.exports = (...args) => new Hyperdiscovery(...args)
 
-const DAT_SWARM_PORT = 3282
-const PORT_ALTS = [3000,3002,3004,2001,2003,2005]
+const DEFAULT_PORT = 3282
+const ALTERNATE_PORTS = [3000, 3002, 3004, 2001, 2003, 2005]
 
 class Hyperdiscovery extends EventEmitter {
+  // Modified from Beaker Browser, copyright Blue Link Labs:
+  //    https://github.com/beakerbrowser/beaker-core/
+  //    https://github.com/beakerbrowser/dat-node
+  // And Core Store, copyright Andrew Osheroff:
+  //    https://github.com/andrewosh/corestore
+
   constructor (feed, opts) {
     super()
 
@@ -24,10 +30,18 @@ class Hyperdiscovery extends EventEmitter {
       feed = null
     }
     opts = opts || {}
+    // Old Options:
+    // * `stream`: function, replication stream for connection. Default is `archive.replicate({live, upload, download})`.
+    // * `upload`: bool, upload data to the other peer?
+    // * `download`: bool, download data from the other peer?
+    // * `port`: port for discovery swarm
+    // * `utp`: use utp in discovery swarm
+    // * `tcp`: use tcp in discovery swarm
+
 
     this._opts = opts
     this.id = opts.id || crypto.randomBytes(32)
-    this.port = typeof opts.port === 'number' ? opts.port : DAT_SWARM_PORT
+    this.port = typeof opts.port === 'number' ? opts.port : DEFAULT_PORT
 
     this._swarm = discoverySwarm(swarmDefaults({
       id: this.id,
@@ -42,11 +56,11 @@ class Hyperdiscovery extends EventEmitter {
     this._swarm.on('listening', () => {
       this.port = this._swarm.address().port
       this.emit('listening', this.port)
-      debug('swarm:listening', {port: this.port})
+      debug('swarm:listening', { port: this.port })
     })
     this._swarm.on('error', async (err) => {
       if (err && err.code !== 'EADDRINUSE') return this.emit('error', err)
-      this.listen(await getPort({port: PORT_ALTS}))
+      this.listen(await getPort({ port: ALTERNATE_PORTS }))
     })
 
     // re-emit a variety of events
@@ -68,7 +82,6 @@ class Hyperdiscovery extends EventEmitter {
     reEmit('connection')
     reEmit('connection-closed')
     reEmit('redundant-connection')
-
 
     this._replicatingFeeds = new Map()
     this._lock = mutexify()
@@ -116,8 +129,7 @@ class Hyperdiscovery extends EventEmitter {
       // lookup the archive
       try {
         var feed = self._replicatingFeeds.get(dkeyStr)
-        if (!feed) return // ?
-        // if (!feed) feed = await self._store._getSeedCore(dkey)
+        if (!feed) return // TODO: error ?
       } catch (err) {
         if (!stream.destroyed) stream.destroy(err)
       }
@@ -136,7 +148,7 @@ class Hyperdiscovery extends EventEmitter {
       }
 
       // create the replication stream
-      feed.replicate({stream, live: true})
+      feed.replicate({ stream, live: true })
       if (stream.destroyed) return // in case the stream was destroyed during setup
 
       // track the stream
@@ -178,7 +190,7 @@ class Hyperdiscovery extends EventEmitter {
     this._replicatingFeeds.set(discoveryKey, feed)
 
     this.join(feed.discoveryKey)
-    this.emit('join', {key, discoveryKey})
+    this.emit('join', { key, discoveryKey })
     feed.isSwarming = true
   }
 

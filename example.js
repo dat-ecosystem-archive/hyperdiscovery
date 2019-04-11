@@ -15,7 +15,7 @@ archive.ready(function (err) {
 })
 archive2.ready(function (err) {
   if (err) throw err
-  archive2.writeFile('example.js', fs.readFileSync('example.js'), ()=>{})
+  archive2.writeFile('example.js', fs.readFileSync('example.js'), () => {})
   discovery.add(archive2)
   console.log('key', archive2.key.toString('hex'))
 })
