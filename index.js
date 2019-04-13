@@ -38,7 +38,6 @@ class Hyperdiscovery extends EventEmitter {
     // * `utp`: use utp in discovery swarm
     // * `tcp`: use tcp in discovery swarm
 
-
     this._opts = opts
     this.id = opts.id || crypto.randomBytes(32)
     this.port = typeof opts.port === 'number' ? opts.port : DEFAULT_PORT
@@ -60,7 +59,9 @@ class Hyperdiscovery extends EventEmitter {
     })
     this._swarm.on('error', async (err) => {
       if (err && err.code !== 'EADDRINUSE') return this.emit('error', err)
-      this.listen(await getPort({ port: ALTERNATE_PORTS }))
+      const port = await getPort({ port: ALTERNATE_PORTS })
+      debug(`Port ${this.port} in use. Trying ${port}.`)
+      this.listen(port)
     })
 
     // re-emit a variety of events
@@ -70,7 +71,6 @@ class Hyperdiscovery extends EventEmitter {
         debug(`swarm:${event}`, ...args)
       })
     }
-    reEmit('error')
     reEmit('peer')
     reEmit('peer-banned')
     reEmit('peer-rejected')
@@ -95,6 +95,18 @@ class Hyperdiscovery extends EventEmitter {
     }
   }
 
+  get totalConnections () {
+    // total connections
+    return this._swarm.connections.length
+  }
+
+  connections (dKey) {
+    if (!dKey) return this.totalConnections
+
+    const feed = this._replicatingFeeds.get(dKey)
+    return feed && feed.peers
+  }
+
   _createReplicationStream (info) {
     var self = this
 
@@ -117,13 +129,13 @@ class Hyperdiscovery extends EventEmitter {
 
     function lockedAdd (dkey) {
       self._lock(release => {
-        add(dkey)
+        _add(dkey)
           .then(() => release())
           .catch(err => release(err))
       })
     }
 
-    async function add (dkey) {
+    async function _add (dkey) {
       const dkeyStr = datEncoding.toStr(dkey)
 
       // lookup the archive
@@ -216,8 +228,11 @@ class Hyperdiscovery extends EventEmitter {
     this._swarm.leave(discoveryKey)
   }
 
-  async stop () {
-    return new Promise((resolve, reject) => {
+  async close () {
+    return new Promise(async (resolve, reject) => {
+      this._replicatingFeeds.forEach((val, key) => {
+        this.remove(key)
+      })
       this._swarm.destroy(err => {
         if (err) return reject(err)
         resolve()

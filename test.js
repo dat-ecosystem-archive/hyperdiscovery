@@ -1,124 +1,161 @@
-var tape = require('tape')
-var hypercore = require('hypercore')
-var hyperdb = require('hyperdb')
-var ram = require('random-access-memory')
-var swarm = require('.')
+const tape = require('tape')
+const hypercore = require('hypercore')
+// const hyperdrive = require('hyperdrive')
+// const hyperdb = require('hyperdb')
+const ram = require('random-access-memory')
+const Discovery = require('.')
 
-function getHypercoreSwarms (opts, cb) {
-  var feed1 = hypercore(ram)
-  feed1.once('ready', function () {
-    var feed2 = hypercore(ram, feed1.key)
-    feed2.once('ready', function () {
-      var write = swarm(feed1, opts)
-      var read = swarm(feed2, opts)
-      var swarms = [write, read]
-      cb(swarms)
+function getHypercoreSwarms (opts) {
+  return new Promise((resolve, reject) => {
+    const feed1 = hypercore(ram)
+
+    feed1.ready(() => {
+      const feed2 = hypercore(ram, feed1.key)
+      feed2.once('ready', () => {
+        const write = Discovery(feed1, opts)
+        const read = Discovery(feed2, opts)
+
+        write.on('error', (err) => {
+          throw err
+        })
+        read.on('error', (err) => {
+          throw err
+        })
+
+        resolve([write, read])
+      })
     })
   })
 }
 
-function getDbSwarms (opts, cb) {
-  var db1 = hyperdb(ram, { valueEncoding: 'utf-8' })
-  db1.once('ready', function () {
-    var db2 = hyperdb(ram, db1.key, { valueEncoding: 'utf-8' })
-    db2.once('ready', function () {
-      var write = swarm(db1, opts)
-      var read = swarm(db2, opts)
-      var swarms = [write, read]
-      cb(swarms)
-    })
+// function getDbSwarms (opts, cb) {
+//   var db1 = hyperdb(ram, { valueEncoding: 'utf-8' })
+//   db1.once('ready', function () {
+//     var db2 = hyperdb(ram, db1.key, { valueEncoding: 'utf-8' })
+//     db2.once('ready', function () {
+//       var write = swarm(db1, opts)
+//       var read = swarm(db2, opts)
+//       var swarms = [write, read]
+//       cb(swarms)
+//     })
+//   })
+// }
+
+tape('connect and close', async (t) => {
+  const [write, read] = await getHypercoreSwarms({})
+  let missing = 2
+
+  write.once('connection', (peer, type) => {
+    t.pass('write connected')
+    t.equals(write.totalConnections, 1)
+    done()
   })
-}
 
-tape('connect and close', function (t) {
-  t.plan(6)
-  getHypercoreSwarms({}, function (swarms) {
-    var write = swarms[0]
-    var read = swarms[1]
-    var missing = 2
+  read.once('connection', (peer, type) => {
+    t.pass('read connected')
+    t.equals(read.totalConnections, 1)
+    done()
+  })
 
-    write.once('connection', function (peer, type) {
-      t.ok(1, 'write connected')
-      t.equals(write.connections.length, 1)
-      done()
-    })
-
-    read.once('connection', function (peer, type) {
-      t.ok(1, 'read connected')
-      t.equals(read.connections.length, 1)
-      done()
-    })
-
-    function done () {
-      if (--missing) return
-      write.close(function () {
-        t.ok(1, 'write closed')
-        read.close(function () {
-          t.ok(1, 'read closed')
-        })
-      })
+  async function done () {
+    if (--missing) return
+    try {
+      await write.close()
+      await read.close()
+    } catch (err) {
+      t.error(err)
     }
-  })
+    t.pass('discovery closed')
+    t.end()
+  }
 })
 
-tape('connect without utp', function (t) {
-  t.plan(6)
-  getHypercoreSwarms({ utp: false }, function (swarms) {
-    var write = swarms[0]
-    var read = swarms[1]
-    var missing = 2
-
-    write.once('connection', function (peer, type) {
-      t.ok(1, 'write connected')
-      t.equals(write.connections.length, 1)
-      done()
-    })
-
-    read.once('connection', function (peer, type) {
-      t.ok(1, 'read connected')
-      t.equals(read.connections.length, 1, 'connection length')
-      done()
-    })
-
-    function done () {
-      if (--missing) return
-      write.close(function () {
-        t.ok(1, 'write closed')
-        read.close(function () {
-          t.ok(1, 'read closed')
-        })
-      })
-    }
+tape('connect without utp', async (t) => {
+  const [write, read] = await getHypercoreSwarms({ utp: false })
+  let missing = 2
+  write.once('connection', (peer, type) => {
+    t.pass('write connected')
+    t.equals(write.totalConnections, 1)
+    done()
   })
+
+  read.once('connection', (peer, type) => {
+    t.pass('read connected')
+    t.equals(read.totalConnections, 1)
+    done()
+  })
+
+  async function done () {
+    if (--missing) return
+    try {
+      await write.close()
+      await read.close()
+    } catch (err) {
+      t.error(err)
+    }
+    t.pass('discovery closed')
+    t.end()
+  }
 })
 
-tape('hyperdb connect and close', function (t) {
-  t.plan(6)
-  getDbSwarms({}, function (swarms) {
-    var write = swarms[0]
-    var read = swarms[1]
-    var missing = 2
+tape('multiple hypercores in single swarm', async (t) => {
+  const [disc1, disc2] = await getHypercoreSwarms({ utp: false })
+  const feed1 = hypercore(ram)
 
-    write.once('connection', function (peer, type) {
-      t.ok(1, 'write connected')
-      t.equals(write.connections.length, 1)
+  disc1.on('connection', (peer, type) => {
+    const dKey = feed1.discoveryKey.toString('hex')
+    if (dKey === peer.discoveryKey.toString('hex')) {
+      t.pass('added feeds connected')
+      // t.equals(disc1.connections(dKey), 1)
       done()
-    })
-
-    read.once('connection', function (peer, type) {
-      t.ok(1, 'read connected')
-      t.equals(read.connections.length, 1)
-      done()
-    })
-
-    function done () {
-      if (--missing) return
-      write.close(function () {
-        t.ok(1, 'write closed')
-        read.close(function () {
-          t.ok(1, 'read closed')
-        })
-      })
     }
   })
+
+  feed1.ready(() => {
+    const feed2 = hypercore(ram, feed1.key)
+    disc1.add(feed1)
+    disc2.add(feed2)
+  })
+
+  async function done () {
+    try {
+      await disc1.close()
+      await disc2.close()
+    } catch (err) {
+      t.error(err)
+    }
+    t.pass('discovery closed')
+    t.end()
+  }
 })
+
+// tape('hyperdb connect and close', (t) => {
+//   t.plan(6)
+//   getDbSwarms({}, function (swarms) {
+//     var write = swarms[0]
+//     var read = swarms[1]
+//     var missing = 2
+
+//     write.once('connection', (peer, type) => {
+//       t.ok(1, 'write connected')
+//       t.equals(write.connections.length, 1)
+//       done()
+//     })
+
+//     read.once('connection', (peer, type) => {
+//       t.ok(1, 'read connected')
+//       t.equals(read.connections.length, 1)
+//       done()
+//     })
+
+//     function done () {
+//       if (--missing) return
+//       write.close(function () {
+//         t.ok(1, 'write closed')
+//         read.close(function () {
+//           t.ok(1, 'read closed')
+//         })
+//       })
+//     }
+//   })
+// })
