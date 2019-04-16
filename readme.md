@@ -73,6 +73,14 @@ Add an archive/feed to the discovery swarm.
 
 Get the list of total active connections, across all archives and feeds.
 
+### `discovery.leave(discoveryKey)`
+
+Leave discovery for a specific discovery key.
+
+### `discovery.rejoin(discoveryKey)`
+
+Rejoin discovery for a discovery key (*must be added first using `discovery.add`).
+
 ### `discovery.close()`
 
 Exit the swarm, close all replication streams.

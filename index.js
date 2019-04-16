@@ -201,12 +201,12 @@ class Hyperdiscovery extends EventEmitter {
     const discoveryKey = datEncoding.toStr(feed.discoveryKey)
     this._replicatingFeeds.set(discoveryKey, feed)
 
-    this.join(feed.discoveryKey)
+    this.rejoin(feed.discoveryKey)
     this.emit('join', { key, discoveryKey })
     feed.isSwarming = true
   }
 
-  join (discoveryKey) {
+  rejoin (discoveryKey) {
     this._swarm.join(discoveryKey)
   }
 
@@ -218,7 +218,7 @@ class Hyperdiscovery extends EventEmitter {
     })
   }
 
-  remove (discoveryKey) {
+  leave (discoveryKey) {
     const feed = this._replicatingFeeds.get(discoveryKey)
     if (!feed) return
     if (feed.replicationStreams) {
@@ -231,7 +231,7 @@ class Hyperdiscovery extends EventEmitter {
   async close () {
     return new Promise(async (resolve, reject) => {
       this._replicatingFeeds.forEach((val, key) => {
-        this.remove(key)
+        this.leave(key)
       })
       this._swarm.destroy(err => {
         if (err) return reject(err)
