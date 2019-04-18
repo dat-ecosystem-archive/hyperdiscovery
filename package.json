@@ -21,7 +21,6 @@
     "dat-swarm-defaults": "^1.0.2",
     "debug": "^4.1.1",
     "discovery-swarm": "^5.1.4",
-    "get-port": "^4.2.0",
     "hypercore-protocol": "^6.9.0",
     "mutexify": "^1.2.0"
   },

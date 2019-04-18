@@ -6,14 +6,12 @@ const hypercoreProtocol = require('hypercore-protocol')
 const discoverySwarm = require('discovery-swarm')
 const swarmDefaults = require('dat-swarm-defaults')
 const mutexify = require('mutexify')
-const getPort = require('get-port')
 
 const debug = require('debug')('hyperdiscovery')
 
 module.exports = (...args) => new Hyperdiscovery(...args)
 
-const DEFAULT_PORT = 3282
-const ALTERNATE_PORTS = [3000, 3002, 3004, 2001, 2003, 2005]
+const DEFAULT_PORTS = [3282, 3000, 3002, 3004, 2001, 2003, 2005]
 
 class Hyperdiscovery extends EventEmitter {
   // Modified from Beaker Browser, copyright Blue Link Labs:
@@ -40,7 +38,16 @@ class Hyperdiscovery extends EventEmitter {
 
     this._opts = opts
     this.id = opts.id || crypto.randomBytes(32)
-    this.port = typeof opts.port === 'number' ? opts.port : DEFAULT_PORT
+    this._port = DEFAULT_PORTS.shift()
+    this._portAlts = DEFAULT_PORTS
+    if (opts.port) {
+      if (Array.isArray(opts.port)) {
+        this._port = opts.port.shift()
+        this._portAlts = opts.port
+      } else {
+        this._port = opts.port
+      }
+    }
 
     this._swarm = discoverySwarm(swarmDefaults({
       id: this.id,
@@ -57,10 +64,10 @@ class Hyperdiscovery extends EventEmitter {
       this.emit('listening', this.port)
       debug('swarm:listening', { port: this.port })
     })
-    this._swarm.on('error', async (err) => {
+    this._swarm.on('error', (err) => {
       if (err && err.code !== 'EADDRINUSE') return this.emit('error', err)
-      const port = await getPort({ port: ALTERNATE_PORTS })
-      debug(`Port ${this.port} in use. Trying ${port}.`)
+      const port = this._portAlts.shift()
+      debug(`Port ${this._port} in use. Trying ${port}.`)
       this.listen(port)
     })
 
@@ -211,7 +218,7 @@ class Hyperdiscovery extends EventEmitter {
   }
 
   listen (port) {
-    port = port || this.port
+    port = port || this._port
     this._swarm.listen(port)
     return new Promise(resolve => {
       this._swarm.once('listening', resolve)
