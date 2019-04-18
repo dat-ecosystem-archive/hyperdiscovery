@@ -235,8 +235,8 @@ class Hyperdiscovery extends EventEmitter {
     this._swarm.leave(discoveryKey)
   }
 
-  async close () {
-    return new Promise(async (resolve, reject) => {
+  close () {
+    return new Promise((resolve, reject) => {
       this._replicatingFeeds.forEach((val, key) => {
         this.leave(key)
       })

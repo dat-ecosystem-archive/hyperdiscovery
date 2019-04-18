@@ -10,9 +10,9 @@ var discovery = Discovery(archive)
 
 archive.ready(function (err) {
   if (err) throw err
-  // discovery.add(archive)
   console.log('key', archive.key.toString('hex'))
 })
+
 archive2.ready(function (err) {
   if (err) throw err
   archive2.writeFile('example.js', fs.readFileSync('example.js'), () => {})
@@ -21,8 +21,6 @@ archive2.ready(function (err) {
 })
 
 discovery.on('connection', function (peer, type) {
-  // console.log('got', peer, type) // type is 'webrtc-swarm' or 'discovery-swarm'
-  // console.log('connected to', sw.connections, 'peers')
   console.log('connection')
   peer.on('close', function () {
     console.log('peer disconnected')
