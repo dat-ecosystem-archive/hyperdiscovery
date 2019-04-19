@@ -1,6 +1,6 @@
 const tape = require('tape')
 const hypercore = require('hypercore')
-// const hyperdrive = require('hyperdrive')
+const hyperdrive = require('hyperdrive')
 // const hyperdb = require('hyperdb')
 const ram = require('random-access-memory')
 const Discovery = require('.')
@@ -20,6 +20,41 @@ function getHypercoreSwarms (opts) {
         })
         read.on('error', (err) => {
           throw err
+        })
+        write.on('close', () => {
+          close(feed1)
+        })
+        read.on('close', () => {
+          close(feed2)
+        })
+
+        resolve([write, read])
+      })
+    })
+  })
+}
+
+function getHyperdriveSwarms (opts) {
+  return new Promise((resolve, reject) => {
+    const archive1 = hyperdrive(ram)
+
+    archive1.ready(() => {
+      const archive2 = hyperdrive(ram, archive1.key)
+      archive2.once('ready', () => {
+        const write = Discovery(archive1, opts)
+        const read = Discovery(archive2, opts)
+
+        write.on('error', (err) => {
+          throw err
+        })
+        read.on('error', (err) => {
+          throw err
+        })
+        write.on('close', () => {
+          close(archive1)
+        })
+        read.on('close', () => {
+          close(archive2)
         })
 
         resolve([write, read])
@@ -41,7 +76,7 @@ function getHypercoreSwarms (opts) {
 //   })
 // }
 
-tape('connect and close', async (t) => {
+tape('hypercore: connect and close', async (t) => {
   const [write, read] = await getHypercoreSwarms({})
   let missing = 2
 
@@ -70,7 +105,7 @@ tape('connect and close', async (t) => {
   }
 })
 
-tape('connect without utp', async (t) => {
+tape('hypercore: connect without utp', async (t) => {
   const [write, read] = await getHypercoreSwarms({ utp: false })
   let missing = 2
   write.once('connection', (peer, type) => {
@@ -98,9 +133,10 @@ tape('connect without utp', async (t) => {
   }
 })
 
-tape('multiple hypercores in single swarm', async (t) => {
+tape('hypercore: multiple in single swarm', async (t) => {
   const [disc1, disc2] = await getHypercoreSwarms({ utp: false })
   const feed1 = hypercore(ram)
+  let feed2
 
   disc1.on('connection', (peer, type) => {
     const dKey = feed1.discoveryKey.toString('hex')
@@ -112,7 +148,7 @@ tape('multiple hypercores in single swarm', async (t) => {
   })
 
   feed1.ready(() => {
-    const feed2 = hypercore(ram, feed1.key)
+    feed2 = hypercore(ram, feed1.key)
     disc1.add(feed1)
     disc2.add(feed2)
   })
@@ -121,6 +157,99 @@ tape('multiple hypercores in single swarm', async (t) => {
     try {
       await disc1.close()
       await disc2.close()
+      await close(feed1)
+      await close(feed2)
+    } catch (err) {
+      t.error(err)
+    }
+    t.pass('discovery closed')
+    t.end()
+  }
+})
+
+tape('hyperdrive: connect and close', async (t) => {
+  const [write, read] = await getHyperdriveSwarms({})
+  let missing = 2
+
+  write.once('connection', (peer, type) => {
+    t.pass('write connected')
+    t.equals(write.totalConnections, 1)
+    done()
+  })
+
+  read.once('connection', (peer, type) => {
+    t.pass('read connected')
+    t.equals(read.totalConnections, 1)
+    done()
+  })
+
+  async function done () {
+    if (--missing) return
+    try {
+      await write.close()
+      await read.close()
+    } catch (err) {
+      t.error(err)
+    }
+    t.pass('discovery closed')
+    t.end()
+  }
+})
+
+tape('hyperdrive: connect without utp', async (t) => {
+  const [write, read] = await getHyperdriveSwarms({ utp: false })
+  let missing = 2
+  write.once('connection', (peer, type) => {
+    t.pass('write connected')
+    t.equals(write.totalConnections, 1)
+    done()
+  })
+
+  read.once('connection', (peer, type) => {
+    t.pass('read connected')
+    t.equals(read.totalConnections, 1)
+    done()
+  })
+
+  async function done () {
+    if (--missing) return
+    try {
+      await write.close()
+      await read.close()
+    } catch (err) {
+      t.error(err)
+    }
+    t.pass('discovery closed')
+    t.end()
+  }
+})
+
+tape('hyperdrive: multiple in single swarm', async (t) => {
+  const [disc1, disc2] = await getHyperdriveSwarms({ utp: false })
+  const archive1 = hyperdrive(ram)
+  let archive2
+
+  disc1.on('connection', (peer, type) => {
+    const dKey = archive1.discoveryKey.toString('hex')
+    if (dKey === peer.discoveryKey.toString('hex')) {
+      t.pass('added feeds connected')
+      // t.equals(disc1.connections(dKey), 1)
+      done()
+    }
+  })
+
+  archive1.ready(() => {
+    archive2 = hyperdrive(ram, archive1.key)
+    disc1.add(archive1)
+    disc2.add(archive2)
+  })
+
+  async function done () {
+    try {
+      await disc1.close()
+      await disc2.close()
+      await close(archive1)
+      await close(archive2)
     } catch (err) {
       t.error(err)
     }
@@ -159,3 +288,9 @@ tape('multiple hypercores in single swarm', async (t) => {
 //     }
 //   })
 // })
+
+async function close (feed) {
+  return new Promise(resolve => {
+    feed.close(resolve)
+  })
+}

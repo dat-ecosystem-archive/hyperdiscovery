@@ -103,7 +103,7 @@ class Hyperdiscovery extends EventEmitter {
   }
 
   get totalConnections () {
-    // total connections
+    // total connections across all keys
     return this._swarm.connections.length
   }
 
@@ -236,12 +236,14 @@ class Hyperdiscovery extends EventEmitter {
   }
 
   close () {
+    const self = this
     return new Promise((resolve, reject) => {
       this._replicatingFeeds.forEach((val, key) => {
         this.leave(key)
       })
       this._swarm.destroy(err => {
         if (err) return reject(err)
+        self.emit('close')
         resolve()
       })
     })
