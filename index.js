@@ -1,47 +1,255 @@
-var swarmDefaults = require('dat-swarm-defaults')
-var disc = require('discovery-swarm')
-var xtend = require('xtend')
+const crypto = require('crypto')
+const EventEmitter = require('events')
 
-module.exports = HyperdriveSwarm
+const datEncoding = require('dat-encoding')
+const hypercoreProtocol = require('hypercore-protocol')
+const discoverySwarm = require('discovery-swarm')
+const swarmDefaults = require('dat-swarm-defaults')
+const mutexify = require('mutexify')
 
-function HyperdriveSwarm (archive, opts) {
-  if (!(this instanceof HyperdriveSwarm)) return new HyperdriveSwarm(archive, opts)
-  if (!opts) opts = {}
+const debug = require('debug')('hyperdiscovery')
 
-  var self = this
-  this.archive = archive
-  this.uploading = !(opts.upload === false)
-  this.downloading = !(opts.download === false)
-  this.live = !(opts.live === false)
+module.exports = (...args) => new Hyperdiscovery(...args)
 
-  var isHyperdbInstance = !!(archive.get && archive.put && archive.replicate && archive.authorize)
+const DEFAULT_PORTS = [3282, 3000, 3002, 3004, 2001, 2003, 2005]
 
-  if (isHyperdbInstance && !archive.local) {
-    throw new Error('hyperdiscovery swarm must be created after the local hyperdb instance is ready!')
+class Hyperdiscovery extends EventEmitter {
+  // Modified from Beaker Browser, copyright Blue Link Labs:
+  //    https://github.com/beakerbrowser/beaker-core/
+  //    https://github.com/beakerbrowser/dat-node
+  // And Core Store, copyright Andrew Osheroff:
+  //    https://github.com/andrewosh/corestore
+
+  constructor (feed, opts) {
+    super()
+
+    if (feed && !feed.replicate) {
+      opts = feed
+      feed = null
+    }
+    opts = opts || {}
+    // Old Options:
+    // * `stream`: function, replication stream for connection. Default is `archive.replicate({live, upload, download})`.
+    // * `upload`: bool, upload data to the other peer?
+    // * `download`: bool, download data from the other peer?
+    // * `port`: port for discovery swarm
+    // * `utp`: use utp in discovery swarm
+    // * `tcp`: use tcp in discovery swarm
+
+    this._opts = opts
+    this.id = opts.id || crypto.randomBytes(32)
+    this._port = DEFAULT_PORTS.shift()
+    this._portAlts = DEFAULT_PORTS
+    if (opts.port) {
+      if (Array.isArray(opts.port)) {
+        this._port = opts.port.shift()
+        this._portAlts = opts.port
+      } else {
+        this._port = opts.port
+      }
+    }
+
+    this._swarm = discoverySwarm(swarmDefaults({
+      id: this.id,
+      hash: false,
+      utp: defaultTrue(opts.utp),
+      tcp: defaultTrue(opts.tcp),
+      dht: defaultTrue(opts.dht),
+      stream: this._createReplicationStream.bind(this)
+    }))
+
+    // bubble listening and errors
+    this._swarm.on('listening', () => {
+      this.port = this._swarm.address().port
+      this.emit('listening', this.port)
+      debug('swarm:listening', { port: this.port })
+    })
+    this._swarm.on('error', (err) => {
+      if (err && err.code !== 'EADDRINUSE') return this.emit('error', err)
+      const port = this._portAlts.shift()
+      debug(`Port ${this._port} in use. Trying ${port}.`)
+      this.listen(port)
+    })
+
+    // re-emit a variety of events
+    const reEmit = (event) => {
+      this._swarm.on(event, (...args) => {
+        this.emit(event, ...args)
+        debug(`swarm:${event}`, ...args)
+      })
+    }
+    reEmit('peer')
+    reEmit('peer-banned')
+    reEmit('peer-rejected')
+    reEmit('drop')
+    reEmit('connecting')
+    reEmit('connect-failed')
+    reEmit('handshaking')
+    reEmit('handshake-timeout')
+    reEmit('connection')
+    reEmit('connection-closed')
+    reEmit('redundant-connection')
+
+    this._replicatingFeeds = new Map()
+    this._lock = mutexify()
+
+    if (opts.autoListen !== false) {
+      this.listen()
+    }
+
+    if (feed) {
+      this.add(feed)
+    }
   }
 
-  // Discovery Swarm Options
-  opts = xtend({
-    port: 3282,
-    id: isHyperdbInstance ? archive.local.id.toString('hex') : archive.id,
-    hash: false,
-    stream: function (peer) {
-      return archive.replicate(xtend({
-        live: self.live,
-        upload: self.uploading,
-        download: self.downloading
-      }, isHyperdbInstance ? {
-        userData: archive.local.key
-      } : {}))
+  get totalConnections () {
+    // total connections across all keys
+    return this._swarm.connections.length
+  }
+
+  connections (dKey) {
+    if (!dKey) return this.totalConnections
+
+    const feed = this._replicatingFeeds.get(dKey)
+    return feed && feed.peers
+  }
+
+  _createReplicationStream (info) {
+    var self = this
+
+    // create the protocol stream
+    var streamKeys = [] // list of keys replicated over the stream
+    var stream = hypercoreProtocol({
+      id: this.id,
+      live: true,
+      encrypt: true
+    })
+    stream.peerInfo = info
+
+    // add the dat if the discovery network gave us any info
+    if (info.channel) {
+      lockedAdd(info.channel)
     }
-  }, opts)
 
-  this.swarm = disc(swarmDefaults(opts))
-  this.swarm.once('error', function () {
-    self.swarm.listen(0)
-  })
+    // add any requested dats
+    stream.on('feed', lockedAdd)
 
-  this.swarm.listen(opts.port)
-  this.swarm.join(this.archive.discoveryKey)
-  return this.swarm
+    function lockedAdd (dkey) {
+      self._lock(release => {
+        _add(dkey)
+          .then(() => release())
+          .catch(err => release(err))
+      })
+    }
+
+    async function _add (dkey) {
+      const dkeyStr = datEncoding.toStr(dkey)
+
+      // lookup the archive
+      try {
+        var feed = self._replicatingFeeds.get(dkeyStr)
+        if (!feed) return // TODO: error ?
+      } catch (err) {
+        if (!stream.destroyed) stream.destroy(err)
+      }
+
+      self._replicatingFeeds.set(dkeyStr, feed)
+
+      if (!feed || !feed.isSwarming) {
+        return
+      }
+
+      if (!feed.replicationStreams) {
+        feed.replicationStreams = []
+      }
+      if (feed.replicationStreams.indexOf(stream) !== -1) {
+        return // already replicating
+      }
+
+      // create the replication stream
+      feed.replicate({ stream, live: true })
+      if (stream.destroyed) return // in case the stream was destroyed during setup
+
+      // track the stream
+      var keyStr = datEncoding.toStr(feed.key)
+      streamKeys.push(keyStr)
+      feed.replicationStreams.push(stream)
+
+      function onend () {
+        feed.replicationStreams = feed.replicationStreams.filter(s => (s !== stream))
+
+        // If the Replicator is the only object with a reference to this core, close it after replication's finished.
+        if (!feed.replicationStreams.length) {
+          self._replicatingFeeds.delete(dkeyStr)
+          feed.close()
+        }
+      }
+      stream.once('error', onend)
+      stream.once('end', onend)
+      stream.once('close', onend)
+    }
+
+    // debugging
+    stream.on('error', err => {
+      debug({
+        event: 'connection-error',
+        peer: `${info.host}:${info.port}`,
+        connectionType: info.type,
+        message: err.toString()
+      })
+    })
+
+    return stream
+  }
+
+  add (feed) {
+    if (!feed.key) return feed.ready(() => { this.add(feed) })
+    const key = datEncoding.toStr(feed.key)
+    const discoveryKey = datEncoding.toStr(feed.discoveryKey)
+    this._replicatingFeeds.set(discoveryKey, feed)
+
+    this.rejoin(feed.discoveryKey)
+    this.emit('join', { key, discoveryKey })
+    feed.isSwarming = true
+  }
+
+  rejoin (discoveryKey) {
+    this._swarm.join(discoveryKey)
+  }
+
+  listen (port) {
+    port = port || this._port
+    this._swarm.listen(port)
+    return new Promise(resolve => {
+      this._swarm.once('listening', resolve)
+    })
+  }
+
+  leave (discoveryKey) {
+    const feed = this._replicatingFeeds.get(discoveryKey)
+    if (!feed) return
+    if (feed.replicationStreams) {
+      feed.replicationStreams.forEach(stream => stream.destroy()) // stop all active replications
+      feed.replicationStreams.length = 0
+    }
+    this._swarm.leave(discoveryKey)
+  }
+
+  close () {
+    const self = this
+    return new Promise((resolve, reject) => {
+      this._replicatingFeeds.forEach((val, key) => {
+        this.leave(key)
+      })
+      this._swarm.destroy(err => {
+        if (err) return reject(err)
+        self.emit('close')
+        resolve()
+      })
+    })
+  }
+}
+
+function defaultTrue (x) {
+  return x === undefined ? true : x
 }

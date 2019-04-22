@@ -15,40 +15,45 @@ Run the following code in two different places and they will replicate the conte
 
 ```js
 var hyperdrive = require('hyperdrive')
-var swarm = require('hyperdiscovery')
+var hypercore = require('hypercore')
+var Discovery = require('hyperdiscovery')
 
 var archive = hyperdrive('./database', 'ARCHIVE_KEY')
-var sw = swarm(archive)
-sw.on('connection', function (peer, type) {
+var discovery = Discovery(archive)
+discovery.on('connection', function (peer, type) {
   console.log('got', peer, type) 
-  console.log('connected to', sw.connections.length, 'peers')
+  console.log('connected to', discovery.connections, 'peers')
   peer.on('close', function () {
     console.log('peer disconnected')
   })
 })
+
+// add another archive/feed later
+var feed = hypercore('./feed')
+discovery.add(feed) // adds this hypercore feed to the same discovery swarm
 ```
 
-Will use `discovery-swarm` to attempt to connect peers. Uses `datland-swarm-defaults` for peer introduction defaults on the server side, which can be overwritten (see below).
+Will use `discovery-swarm` to attempt to connect peers. Uses `dat-swarm-defaults` for peer introduction defaults on the server side, which can be overwritten (see below).
 
 The module can also create and join a swarm for a hypercore feed:
 
 ```js
 var hypercore = require('hypercore')
-var swarm = require('hyperdiscovery')
+var Discovery = require('hyperdiscovery')
 
 var feed = hypercore('/feed')
-var sw = swarm(feed)
+var discovery = Discovery(feed)
 ```
 
 The module can also create and join a swarm for a hyperdb feed:
 
 ```js
 var hyperdb = require('hyperdb')
-var swarm = require('hyperdiscovery')
+var Discovery = require('hyperdiscovery')
 
 var db = hyperdb('/feed', 'ARCHIVE_KEY')
 db.on('ready', function() {
-  var sw = swarm(db)
+  var discovery = Discovery(db)
 })
 ```
 
@@ -56,17 +61,29 @@ A hyperdb database must be ready before attempting to connect to the swarm.
 
 ## API
 
-### `var sw = swarm(archive, opts)`
+### `var discovery = Discovery(archive, opts)`
 
-Join the p2p swarm for the given feed. The return object, `sw`, is an event emitter that will emit a `peer` event with the peer information when a peer is found.
+Join the p2p swarm for the given feed. The return object, `discovery`, is an event emitter that will emit a `peer` event with the peer information when a peer is found.
 
-### sw.connections
+### `discovery.add(archive)`
 
-Get the list of currently active connections.
+Add an archive/feed to the discovery swarm.
 
-### sw.close()
+### `discovery.totalConnections`
 
-Exit the swarm
+Get the list of total active connections, across all archives and feeds.
+
+### `discovery.leave(discoveryKey)`
+
+Leave discovery for a specific discovery key.
+
+### `discovery.rejoin(discoveryKey)`
+
+Rejoin discovery for a discovery key (*must be added first using `discovery.add`).
+
+### `discovery.close()`
+
+Exit the swarm, close all replication streams.
 
 ##### Options
 
