@@ -177,12 +177,6 @@ class Hyperdiscovery extends EventEmitter {
 
       function onend () {
         feed.replicationStreams = feed.replicationStreams.filter(s => (s !== stream))
-
-        // If the Replicator is the only object with a reference to this core, close it after replication's finished.
-        if (!feed.replicationStreams.length) {
-          self._replicatingFeeds.delete(dkeyStr)
-          feed.close()
-        }
       }
       stream.once('error', onend)
       stream.once('end', onend)
