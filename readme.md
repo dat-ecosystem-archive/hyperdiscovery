@@ -71,7 +71,7 @@ Add an archive/feed to the discovery swarm.
 
 ### `discovery.totalConnections`
 
-Get the list of total active connections, across all archives and feeds.
+Get length of the list of total active connections, across all archives and feeds.
 
 ### `discovery.leave(discoveryKey)`
 
