@@ -228,7 +228,7 @@ class Hyperdiscovery extends EventEmitter {
       feed.replicationStreams.length = 0
     }
     this._swarm.leave(feed.discoveryKey)
-    this.emit('leave', {feed.key.toString('hex'), dKeyStr})
+    this.emit('leave', { key: feed.key.toString('hex'), discoveryKey: dKeyStr })
   }
 
   close () {
