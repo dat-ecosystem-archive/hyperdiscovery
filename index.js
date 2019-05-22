@@ -208,7 +208,7 @@ class Hyperdiscovery extends EventEmitter {
   }
 
   rejoin (discoveryKey) {
-    this._swarm.join(discoveryKey)
+    this._swarm.join(datEncoding.toBuf(discoveryKey))
   }
 
   listen (port) {
@@ -220,13 +220,15 @@ class Hyperdiscovery extends EventEmitter {
   }
 
   leave (discoveryKey) {
-    const feed = this._replicatingFeeds.get(discoveryKey)
+    const dKeyStr = datEncoding.toStr(discoveryKey)
+    const feed = this._replicatingFeeds.get(dKeyStr)
     if (!feed) return
     if (feed.replicationStreams) {
       feed.replicationStreams.forEach(stream => stream.destroy()) // stop all active replications
       feed.replicationStreams.length = 0
     }
-    this._swarm.leave(discoveryKey)
+    this._swarm.leave(feed.discoveryKey)
+    this.emit('leave', { key: feed.key.toString('hex'), discoveryKey: dKeyStr })
   }
 
   close () {
