@@ -82,13 +82,13 @@ tape('hypercore: connect and close', async (t) => {
 
   write.once('connection', (peer, type) => {
     t.pass('write connected')
-    t.equals(write.totalConnections, 1)
+    t.equals(write.connections.length, 1)
     done()
   })
 
   read.once('connection', (peer, type) => {
     t.pass('read connected')
-    t.equals(read.totalConnections, 1)
+    t.equals(read.connections.length, 1)
     done()
   })
 
@@ -110,13 +110,13 @@ tape('hypercore: connect without utp', async (t) => {
   let missing = 2
   write.once('connection', (peer, type) => {
     t.pass('write connected')
-    t.equals(write.totalConnections, 1)
+    t.equals(write.connections.length, 1)
     done()
   })
 
   read.once('connection', (peer, type) => {
     t.pass('read connected')
-    t.equals(read.totalConnections, 1)
+    t.equals(read.connections.length, 1)
     done()
   })
 
@@ -142,7 +142,6 @@ tape('hypercore: multiple in single swarm', async (t) => {
     const dKey = feed1.discoveryKey.toString('hex')
     if (dKey === peer.discoveryKey.toString('hex')) {
       t.pass('added feeds connected')
-      // t.equals(disc1.connections(dKey), 1)
       done()
     }
   })
@@ -173,13 +172,13 @@ tape('hyperdrive: connect and close', async (t) => {
 
   write.once('connection', (peer, type) => {
     t.pass('write connected')
-    t.equals(write.totalConnections, 1)
+    t.equals(write.connections.length, 1)
     done()
   })
 
   read.once('connection', (peer, type) => {
     t.pass('read connected')
-    t.equals(read.totalConnections, 1)
+    t.equals(read.connections.length, 1)
     done()
   })
 
@@ -201,13 +200,13 @@ tape('hyperdrive: connect without utp', async (t) => {
   let missing = 2
   write.once('connection', (peer, type) => {
     t.pass('write connected')
-    t.equals(write.totalConnections, 1)
+    t.equals(write.connections.length, 1)
     done()
   })
 
   read.once('connection', (peer, type) => {
     t.pass('read connected')
-    t.equals(read.totalConnections, 1)
+    t.equals(read.connections.length, 1)
     done()
   })
 
@@ -258,36 +257,39 @@ tape('hyperdrive: multiple in single swarm', async (t) => {
   }
 })
 
-// tape('hyperdb connect and close', (t) => {
-//   t.plan(6)
-//   getDbSwarms({}, function (swarms) {
-//     var write = swarms[0]
-//     var read = swarms[1]
-//     var missing = 2
+tape('leave: leaving does not close connections', async (t) => {
+  const [disc1, disc2] = await getHyperdriveSwarms({ utp: false })
+  const archive1 = hyperdrive(ram)
+  let archive2
 
-//     write.once('connection', (peer, type) => {
-//       t.ok(1, 'write connected')
-//       t.equals(write.connections.length, 1)
-//       done()
-//     })
+  disc1.on('connection', (peer, type) => {
+    const dKey = archive1.discoveryKey.toString('hex')
+    if (dKey === peer.discoveryKey.toString('hex')) {
+      t.pass('added feeds connected')
+      disc1.leave(dKey)
+      done()
+    }
+  })
 
-//     read.once('connection', (peer, type) => {
-//       t.ok(1, 'read connected')
-//       t.equals(read.connections.length, 1)
-//       done()
-//     })
+  archive1.ready(() => {
+    archive2 = hyperdrive(ram, archive1.key)
+    disc1.add(archive1)
+    disc2.add(archive2)
+  })
 
-//     function done () {
-//       if (--missing) return
-//       write.close(function () {
-//         t.ok(1, 'write closed')
-//         read.close(function () {
-//           t.ok(1, 'read closed')
-//         })
-//       })
-//     }
-//   })
-// })
+  async function done () {
+    try {
+      await disc1.close()
+      await disc2.close()
+      await close(archive1)
+      await close(archive2)
+    } catch (err) {
+      t.error(err)
+    }
+    t.pass('discovery closed')
+    t.end()
+  }
+})
 
 async function close (feed) {
   return new Promise(resolve => {
