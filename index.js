@@ -138,7 +138,7 @@ class Hyperdiscovery extends EventEmitter {
       self._lock(release => {
         _add(dkey)
           .then(() => release())
-          .catch(err => release(err))
+          .catch(err => release(null, err))
       })
     }
 
