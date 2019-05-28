@@ -168,7 +168,7 @@ tape('hypercore: multiple in single swarm', async (t) => {
 })
 
 tape('hyperdrive: connect and close', async (t) => {
-  const [write, read] = await getHyperdriveSwarms({})
+  const [write, read] = await getHyperdriveSwarms({ utp: false })
   let missing = 2
 
   write.once('connection', (peer, type) => {
