@@ -5,7 +5,6 @@ const datEncoding = require('dat-encoding')
 const hypercoreProtocol = require('hypercore-protocol')
 const discoverySwarm = require('discovery-swarm')
 const swarmDefaults = require('dat-swarm-defaults')
-const mutexify = require('mutexify')
 
 const debug = require('debug')('hyperdiscovery')
 
@@ -91,7 +90,6 @@ class Hyperdiscovery extends EventEmitter {
     reEmit('redundant-connection')
 
     this._replicatingFeeds = new Map()
-    this._lock = mutexify()
 
     if (opts.autoListen !== false) {
       this.listen()
@@ -128,21 +126,13 @@ class Hyperdiscovery extends EventEmitter {
 
     // add the dat if the discovery network gave us any info
     if (info.channel) {
-      lockedAdd(info.channel)
+      add(info.channel)
     }
 
     // add any requested dats
-    stream.on('feed', lockedAdd)
+    stream.on('feed', add)
 
-    function lockedAdd (dkey) {
-      self._lock(release => {
-        _add(dkey)
-          .then(() => release())
-          .catch(err => release(err))
-      })
-    }
-
-    async function _add (dkey) {
+    function add (dkey) {
       const dkeyStr = datEncoding.toStr(dkey)
 
       // lookup the archive
