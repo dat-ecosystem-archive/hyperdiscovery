@@ -100,6 +100,10 @@ class Hyperdiscovery extends EventEmitter {
     }
   }
 
+  get totalConnections () {
+    return this._swarm.connections.length
+  }
+
   connections (dKey) {
     if (!dKey) return this._swarm.connections
 
@@ -176,6 +180,11 @@ class Hyperdiscovery extends EventEmitter {
     this._replicatingFeeds.set(dKeyStr, feed)
     this.join(feed.discoveryKey)
     this.emit('join', { key, dKeyStr })
+  }
+
+  // for backwards compatibility
+  rejoin (discoveryKey) {
+    this.join(discoveryKey)
   }
 
   join (discoveryKey) {
