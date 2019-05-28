@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/karissa/hyperdiscovery.git"
+    "url": "git+https://github.com/datproject/hyperdiscovery.git"
   },
   "author": "Dat Project Contributors",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/karissa/hyperdiscovery/issues"
+    "url": "https://github.com/datproject/hyperdiscovery/issues"
   },
-  "homepage": "https://github.com/karissa/hyperdiscovery#readme",
+  "homepage": "https://github.com/datproject/hyperdiscovery#readme",
   "dependencies": {
     "dat-encoding": "^5.0.1",
     "dat-swarm-defaults": "^1.0.2",
