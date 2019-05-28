@@ -1,8 +1,8 @@
 # hyperdiscovery
 
-[![build status](https://travis-ci.org/karissa/hyperdiscovery.svg?branch=master)](http://travis-ci.org/karissa/hyperdiscovery)
+[![build status](https://travis-ci.org/datproject/hyperdiscovery.svg?branch=master)](http://travis-ci.org/datproject/hyperdiscovery)
 
-Join the p2p swarm for [hypercore][core], [hyperdrive][drive], and [hyperdb][db] feeds. Uses
+Join the p2p swarm for [hypercore][core] and [hyperdrive][drive]. Uses
 [discovery-swarm][swarm] under the hood.
 
 ```
@@ -44,20 +44,6 @@ var Discovery = require('hyperdiscovery')
 var feed = hypercore('/feed')
 var discovery = Discovery(feed)
 ```
-
-The module can also create and join a swarm for a hyperdb feed:
-
-```js
-var hyperdb = require('hyperdb')
-var Discovery = require('hyperdiscovery')
-
-var db = hyperdb('/feed', 'ARCHIVE_KEY')
-db.on('ready', function() {
-  var discovery = Discovery(db)
-})
-```
-
-A hyperdb database must be ready before attempting to connect to the swarm.
 
 ## API
 
