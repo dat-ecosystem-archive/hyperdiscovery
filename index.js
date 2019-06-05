@@ -120,7 +120,8 @@ class Hyperdiscovery extends EventEmitter {
     var stream = hypercoreProtocol({
       id: this.id,
       live: true,
-      encrypt: true
+      encrypt: true,
+      extensions: this._opts.extensions
     })
     stream.peerInfo = info
 
