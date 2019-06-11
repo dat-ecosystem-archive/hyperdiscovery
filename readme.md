@@ -3,7 +3,7 @@
 [![build status](https://travis-ci.org/datproject/hyperdiscovery.svg?branch=master)](http://travis-ci.org/datproject/hyperdiscovery)
 
 Join the p2p swarm for [hypercore][core] and [hyperdrive][drive]. Uses
-[discovery-swarm][swarm] under the hood.
+[discovery-swarm][swarm] under the hood. Also works in web browsers using [discovery-swarm-web](https://github.com/RangerMauve/discovery-swarm-web).
 
 ```
 npm install hyperdiscovery
@@ -21,7 +21,7 @@ var Discovery = require('hyperdiscovery')
 var archive = hyperdrive('./database', 'ARCHIVE_KEY')
 var discovery = Discovery(archive)
 discovery.on('connection', function (peer, type) {
-  console.log('got', peer, type) 
+  console.log('got', peer, type)
   console.log('connected to', discovery.connections, 'peers')
   peer.on('close', function () {
     console.log('peer disconnected')
@@ -79,6 +79,8 @@ Exit the swarm, close all replication streams.
   * `port`: port for discovery swarm
   * `utp`: use utp in discovery swarm
   * `tcp`: use tcp in discovery swarm
+  * `signalhub`: string, WebRTC signalhub server for web
+  * `discovery`: string, discovery-swarm-stream server for web
 
 Defaults from datland-swarm-defaults can also be overwritten:
 
@@ -91,6 +93,7 @@ Defaults from datland-swarm-defaults can also be overwritten:
 - [mafintosh/hyperdrive][drive]
 - [mafintosh/hyperdb][db]
 - [mafintosh/discovery-swarm][swarm]
+- [discovery-swarm-web][swarm-web]
 
 ## License
 ISC
@@ -99,3 +102,4 @@ ISC
 [drive]: https://github.com/mafintosh/hyperdrive
 [db]: https://github.com/mafintosh/hyperdb
 [swarm]: https://github.com/mafintosh/discovery-swarm
+[swarm-web]: https://github.com/RangerMauve/discovery-swarm-web

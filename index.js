@@ -49,11 +49,17 @@ class Hyperdiscovery extends EventEmitter {
     }
 
     this._swarm = discoverySwarm(swarmDefaults({
-      id: this.id,
+      // Discovery-swarm options
       hash: false,
       utp: defaultTrue(opts.utp),
       tcp: defaultTrue(opts.tcp),
       dht: defaultTrue(opts.dht),
+
+      // Discovery-swarm-web options
+      signalhub: opts.signalhub,
+      discovery: opts.discovery,
+
+      id: this.id,
       stream: this._createReplicationStream.bind(this)
     }))
 
