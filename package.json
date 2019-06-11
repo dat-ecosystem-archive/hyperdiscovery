@@ -11,7 +11,7 @@
     "url": "git+https://github.com/datproject/hyperdiscovery.git"
   },
   "author": "Dat Project Contributors",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/datproject/hyperdiscovery/issues"
   },
