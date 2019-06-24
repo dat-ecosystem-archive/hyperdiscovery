@@ -4,7 +4,8 @@
   "description": "Join the p2p swarm for hypercore and hyperdrive feeds.",
   "main": "index.js",
   "scripts": {
-    "test": "standard && dependency-check . && node test.js"
+    "test": "standard && dependency-check . && node test.js",
+    "build-example": "browserify example.js > example-bundle.js"
   },
   "repository": {
     "type": "git",
@@ -15,16 +16,21 @@
   "bugs": {
     "url": "https://github.com/datproject/hyperdiscovery/issues"
   },
+  "browser": {
+    "discovery-swarm": "discovery-swarm-web"
+  },
   "homepage": "https://github.com/datproject/hyperdiscovery#readme",
   "dependencies": {
     "dat-encoding": "^5.0.1",
     "dat-swarm-defaults": "^1.0.2",
     "debug": "^4.1.1",
     "discovery-swarm": "^5.1.4",
+    "discovery-swarm-web": "^1.3.0",
     "hypercore-protocol": "^6.9.0",
     "mutexify": "^1.2.0"
   },
   "devDependencies": {
+    "browserify": "^16.2.3",
     "dependency-check": "^3.3.0",
     "hypercore": "^6.25.2",
     "hyperdb": "^3.5.0",
