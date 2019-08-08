@@ -70,7 +70,7 @@ class Hyperdiscovery extends EventEmitter {
       debug('swarm:listening', { port: this.port })
     })
     this._swarm.on('error', (err) => {
-      if (err && err.code !== 'EADDRINUSE') return this.emit('error', err)
+      if (err && err.code !== 'EADDRINUSE' && err.message !== 'Could not bind') return this.emit('error', err)
       const port = this._portAlts.shift()
       debug(`Port ${this._port} in use. Trying ${port}.`)
       this.listen(port)
