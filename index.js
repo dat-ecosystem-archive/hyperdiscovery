@@ -73,6 +73,7 @@ class Hyperdiscovery extends EventEmitter {
       if (err && err.code !== 'EADDRINUSE' && err.message !== 'Could not bind') return this.emit('error', err)
       const port = this._portAlts.shift()
       debug(`Port ${this._port} in use. Trying ${port}.`)
+      this._port = port
       this.listen(port)
     })
 
