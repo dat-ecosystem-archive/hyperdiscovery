@@ -79,7 +79,7 @@ Exit the swarm, close all replication streams.
   * `port`: port for discovery swarm
   * `utp`: use utp in discovery swarm
   * `tcp`: use tcp in discovery swarm
-  * `signalhub`: string, WebRTC signalhub server for web
+  * `bootstrap`: [string], WebRTC bootstrap signal servers for web
   * `discovery`: string, discovery-swarm-stream server for web
 
 Defaults from datland-swarm-defaults can also be overwritten:

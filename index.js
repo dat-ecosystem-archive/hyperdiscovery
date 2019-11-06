@@ -56,7 +56,7 @@ class Hyperdiscovery extends EventEmitter {
       dht: defaultTrue(opts.dht),
 
       // Discovery-swarm-web options
-      signalhub: opts.signalhub,
+      bootstrap: opts.bootstrap,
       discovery: opts.discovery,
 
       id: this.id,
