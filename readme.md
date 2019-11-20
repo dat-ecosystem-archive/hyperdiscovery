@@ -55,7 +55,7 @@ Join the p2p swarm for the given feed. The return object, `discovery`, is an eve
 
 Add an archive/feed to the discovery swarm.
 
-### `discovery.totalConnections`
+### `discovery.connections`
 
 Get length of the list of total active connections, across all archives and feeds.
 
@@ -63,13 +63,17 @@ Get length of the list of total active connections, across all archives and feed
 
 Leave discovery for a specific discovery key.
 
-### `discovery.rejoin(discoveryKey)`
+### `discovery.join(discoveryKey)`
 
-Rejoin discovery for a discovery key (*must be added first using `discovery.add`).
+Join discovery for a discovery key (*must be added first using `discovery.add`).
+
+### `discovery.closeFeed(discoveryKey)`
+
+Close replication streams for the given discovery key. 
 
 ### `discovery.close()`
 
-Exit the swarm, close all replication streams.
+Exit the swarm, close replication streams. 
 
 ##### Options
 
@@ -91,7 +95,6 @@ Defaults from datland-swarm-defaults can also be overwritten:
 ## See Also
 - [mafintosh/hypercore][core]
 - [mafintosh/hyperdrive][drive]
-- [mafintosh/hyperdb][db]
 - [mafintosh/discovery-swarm][swarm]
 - [discovery-swarm-web][swarm-web]
 

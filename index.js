@@ -108,12 +108,11 @@ class Hyperdiscovery extends EventEmitter {
   }
 
   get totalConnections () {
-    // total connections across all keys
     return this._swarm.connections.length
   }
 
   connections (dKey) {
-    if (!dKey) return this.totalConnections
+    if (!dKey) return this._swarm.connections
 
     const feed = this._replicatingFeeds.get(dKey)
     return feed && feed.peers
@@ -133,9 +132,7 @@ class Hyperdiscovery extends EventEmitter {
     stream.peerInfo = info
 
     // add the dat if the discovery network gave us any info
-    if (info.channel) {
-      add(info.channel)
-    }
+    if (info.channel) add(info.channel)
 
     // add any requested dats
     stream.on('feed', add)
@@ -151,18 +148,8 @@ class Hyperdiscovery extends EventEmitter {
         if (!stream.destroyed) stream.destroy(err)
       }
 
-      self._replicatingFeeds.set(dkeyStr, feed)
-
-      if (!feed || !feed.isSwarming) {
-        return
-      }
-
-      if (!feed.replicationStreams) {
-        feed.replicationStreams = []
-      }
-      if (feed.replicationStreams.indexOf(stream) !== -1) {
-        return // already replicating
-      }
+      if (!feed.replicationStreams) feed.replicationStreams = []
+      if (feed.replicationStreams.indexOf(stream) !== -1) return // already replicating
 
       // create the replication stream
       feed.replicate({ stream, live: true })
@@ -197,15 +184,18 @@ class Hyperdiscovery extends EventEmitter {
   add (feed) {
     if (!feed.key) return feed.ready(() => { this.add(feed) })
     const key = datEncoding.toStr(feed.key)
-    const discoveryKey = datEncoding.toStr(feed.discoveryKey)
-    this._replicatingFeeds.set(discoveryKey, feed)
-
-    this.rejoin(feed.discoveryKey)
-    this.emit('join', { key, discoveryKey })
-    feed.isSwarming = true
+    const dKeyStr = datEncoding.toStr(feed.discoveryKey)
+    this._replicatingFeeds.set(dKeyStr, feed)
+    this.join(feed.discoveryKey)
+    this.emit('join', { key, dKeyStr })
   }
 
+  // for backwards compatibility
   rejoin (discoveryKey) {
+    this.join(discoveryKey)
+  }
+
+  join (discoveryKey) {
     this._swarm.join(datEncoding.toBuf(discoveryKey))
   }
 
@@ -221,19 +211,28 @@ class Hyperdiscovery extends EventEmitter {
     const dKeyStr = datEncoding.toStr(discoveryKey)
     const feed = this._replicatingFeeds.get(dKeyStr)
     if (!feed) return
-    if (feed.replicationStreams) {
-      feed.replicationStreams.forEach(stream => stream.destroy()) // stop all active replications
-      feed.replicationStreams.length = 0
-    }
     this._swarm.leave(feed.discoveryKey)
     this.emit('leave', { key: feed.key.toString('hex'), discoveryKey: dKeyStr })
+  }
+
+  closeFeed (discoveryKey) {
+    const dKeyStr = datEncoding.toStr(discoveryKey)
+    var feed = this._replicatingFeeds.get(dKeyStr)
+    if (!feed) return
+    if (feed.replicationStreams) {
+      // stop all active replications
+      while (feed.replicationStreams.length) {
+        var stream = feed.replicationStreams.pop()
+        stream.destroy()
+      }
+    }
   }
 
   close () {
     const self = this
     return new Promise((resolve, reject) => {
-      this._replicatingFeeds.forEach((val, key) => {
-        this.leave(key)
+      this._replicatingFeeds.forEach((feed, dKeyStr) => {
+        this.closeFeed(dKeyStr)
       })
       this._swarm.destroy(err => {
         if (err) return reject(err)
