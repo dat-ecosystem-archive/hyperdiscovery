@@ -1,9 +1,21 @@
 # hyperdiscovery
 
+## DEPRECATED
+
+This module has been **deprecated** in favor of
+[hyperswarm/replicator](https://github.com/hyperswarm/replicator) which is
+compatible with hypercore v8. 
+
+### Old documentation below
+
+This library is compatible with hypercore<=v7, which is now out of date. 
+
 [![build status](https://travis-ci.org/datproject/hyperdiscovery.svg?branch=master)](http://travis-ci.org/datproject/hyperdiscovery)
 
 Join the p2p swarm for [hypercore][core] and [hyperdrive][drive]. Uses
 [discovery-swarm][swarm] under the hood. Also works in web browsers using [discovery-swarm-web](https://github.com/RangerMauve/discovery-swarm-web).
+
+This module only works
 
 ```
 npm install hyperdiscovery
