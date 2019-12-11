@@ -194,19 +194,19 @@ class Hyperdiscovery extends EventEmitter {
     return stream
   }
 
-  add (feed) {
+  add (feed, opts) {
     if (!feed.key) return feed.ready(() => { this.add(feed) })
     const key = datEncoding.toStr(feed.key)
     const discoveryKey = datEncoding.toStr(feed.discoveryKey)
     this._replicatingFeeds.set(discoveryKey, feed)
 
-    this.rejoin(feed.discoveryKey)
+    this.rejoin(feed.discoveryKey, opts)
     this.emit('join', { key, discoveryKey })
     feed.isSwarming = true
   }
 
-  rejoin (discoveryKey) {
-    this._swarm.join(datEncoding.toBuf(discoveryKey))
+  rejoin (discoveryKey, opts) {
+    this._swarm.join(datEncoding.toBuf(discoveryKey), opts)
   }
 
   listen (port) {

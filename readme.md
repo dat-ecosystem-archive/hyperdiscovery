@@ -63,9 +63,9 @@ var discovery = Discovery(feed)
 
 Join the p2p swarm for the given feed. The return object, `discovery`, is an event emitter that will emit a `peer` event with the peer information when a peer is found.
 
-### `discovery.add(archive)`
+### `discovery.add(archive, [opts])`
 
-Add an archive/feed to the discovery swarm.
+Add an archive/feed to the discovery swarm. Options will be passed to `discovery-swarm`. If you pass `opts.announce` as a falsy value you don't announce your port (discover-only mode).
 
 ### `discovery.totalConnections`
 
