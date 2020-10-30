@@ -100,6 +100,10 @@ Defaults from datland-swarm-defaults can also be overwritten:
   * `dns.domain`: DNS domain
   * `dht.bootstrap`: distributed hash table bootstrapping nodes
 
+## Debugging
+
+Set `DEBUG='*'` in the environment to enable debugging output inside discovery-swarm.
+
 ## See Also
 - [mafintosh/hypercore][core]
 - [mafintosh/hyperdrive][drive]
