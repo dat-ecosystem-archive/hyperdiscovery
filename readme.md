@@ -1,10 +1,11 @@
+
+[![deprecated](http://badges.github.io/stability-badges/dist/deprecated.svg)](https://github.com/hyperswarm/replicator) See [hyperswarm replicator](https://github.com/hyperswarm/replicator) for similar functionality. 
+
+More info on active projects and modules at [dat-ecosystem.org](https://dat-ecosystem.org/) <img src="https://i.imgur.com/qZWlO1y.jpg" width="30" height="30" /> 
+
+---
+
 # hyperdiscovery
-
-## DEPRECATED
-
-This module has been **deprecated** in favor of
-[hyperswarm/replicator](https://github.com/hyperswarm/replicator) which is
-compatible with hypercore v8. 
 
 ### Old documentation below
 
